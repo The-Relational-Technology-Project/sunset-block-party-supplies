@@ -1,15 +1,13 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Gift, Users, Heart, Search, Plus, Sparkles } from "lucide-react";
-
 interface LandingPageProps {
   onTabChange: (tab: string) => void;
 }
-
-export function LandingPage({ onTabChange }: LandingPageProps) {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-blue-50">
+export function LandingPage({
+  onTabChange
+}: LandingPageProps) {
+  return <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-blue-50">
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 text-center">
         <div className="max-w-4xl mx-auto">
@@ -34,20 +32,11 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button
-              size="lg"
-              onClick={() => onTabChange('browse')}
-              className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-lg px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
-            >
+            <Button size="lg" onClick={() => onTabChange('browse')} className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-lg px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
               <Search className="h-5 w-5 mr-2" />
               Browse Supplies
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => onTabChange('add')}
-              className="border-2 border-orange-500 text-orange-600 hover:bg-orange-50 text-lg px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
-            >
+            <Button size="lg" variant="outline" onClick={() => onTabChange('add')} className="border-2 border-orange-500 text-orange-600 hover:bg-orange-50 text-lg px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
               <Plus className="h-5 w-5 mr-2" />
               Share Your Items
             </Button>
@@ -63,7 +52,7 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
             <div className="text-center">
               <div className="text-3xl mb-2">🏡</div>
               <div className="text-xl font-bold text-gray-800">Meet Neighbors</div>
-              <div className="text-gray-600">Build lasting friendships</div>
+              <div className="text-gray-600">Help each other out</div>
             </div>
             <div className="text-center">
               <div className="text-3xl mb-2">🎊</div>
@@ -127,17 +116,11 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
           <p className="text-xl mb-8 opacity-95">
             Join your neighbors in making party planning easier and more fun!
           </p>
-          <Button
-            size="lg"
-            variant="secondary"
-            onClick={() => onTabChange('planner')}
-            className="text-lg px-10 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 bg-white text-purple-600 hover:bg-gray-50"
-          >
+          <Button size="lg" variant="secondary" onClick={() => onTabChange('planner')} className="text-lg px-10 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 bg-white text-purple-600 hover:bg-gray-50">
             <Sparkles className="h-5 w-5 mr-2" />
             Plan Your Party
           </Button>
         </div>
       </section>
-    </div>
-  );
+    </div>;
 }
