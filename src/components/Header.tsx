@@ -32,7 +32,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
           >
             <Gift className="h-8 w-8" />
             <div>
-              <h1 className="text-xl md:text-2xl font-bold">Our Party Supplies</h1>
+              <h1 className="text-xl md:text-2xl font-bold">Community Party Supplies</h1>
               <p className="text-orange-100 text-xs md:text-sm">Teamwork makes the dream work</p>
             </div>
           </div>
