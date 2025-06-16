@@ -44,10 +44,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Only show header when not on landing page */}
-      {activeTab !== "home" && (
-        <Header activeTab={activeTab} onTabChange={setActiveTab} />
-      )}
+      <Header activeTab={activeTab} onTabChange={setActiveTab} />
       {renderContent()}
       <ContactModal 
         supply={selectedSupply}
