@@ -1,7 +1,6 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Gift, Users, Heart, Search, Plus, Sparkles, PartyPopper, Cake, Balloon } from "lucide-react";
+import { Gift, Users, Heart, Search, Plus, Sparkles, PartyPopper, Cake, CircleDot } from "lucide-react";
 
 interface LandingPageProps {
   onTabChange: (tab: string) => void;
@@ -15,7 +14,7 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
         {/* Floating Party Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-10 animate-bounce delay-100">
-            <Balloon className="h-8 w-8 text-pink-400" />
+            <CircleDot className="h-8 w-8 text-pink-400" />
           </div>
           <div className="absolute top-32 right-20 animate-bounce delay-300">
             <PartyPopper className="h-6 w-6 text-orange-400" />
@@ -147,7 +146,7 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
             <PartyPopper className="h-12 w-12" />
           </div>
           <div className="absolute bottom-10 right-10 animate-spin-slow">
-            <Balloon className="h-16 w-16" />
+            <CircleDot className="h-16 w-16" />
           </div>
         </div>
         
