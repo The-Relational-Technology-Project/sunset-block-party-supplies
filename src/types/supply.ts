@@ -1,4 +1,3 @@
-
 export interface Supply {
   id: string;
   name: string;
@@ -14,6 +13,7 @@ export interface Supply {
     avatar: string;
   };
   image?: string;
+  houseRules?: string[];
 }
 
 export interface PartyPlan {

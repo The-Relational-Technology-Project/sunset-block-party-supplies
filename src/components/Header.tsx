@@ -1,6 +1,7 @@
 
-import { Gift, Search, Plus, Sparkles } from "lucide-react";
+import { Gift, Search, Plus, Sparkles, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 interface HeaderProps {
   activeTab: string;
@@ -8,48 +9,78 @@ interface HeaderProps {
 }
 
 export function Header({ activeTab, onTabChange }: HeaderProps) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const navigationItems = [
+    { key: 'browse', label: 'Browse Supplies', icon: Search },
+    { key: 'add', label: 'Add Supply', icon: Plus },
+    { key: 'planner', label: 'Party Planner', icon: Sparkles },
+  ];
+
+  const handleTabChange = (tab: string) => {
+    onTabChange(tab);
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <header className="bg-gradient-to-r from-orange-400 to-orange-500 text-white shadow-lg">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div 
             className="flex items-center space-x-2 cursor-pointer" 
-            onClick={() => onTabChange('home')}
+            onClick={() => handleTabChange('home')}
           >
             <Gift className="h-8 w-8" />
             <div>
-              <h1 className="text-2xl font-bold">Our Party Supplies</h1>
-              <p className="text-orange-100 text-sm">Teamwork makes the dream work</p>
+              <h1 className="text-xl md:text-2xl font-bold">Our Party Supplies</h1>
+              <p className="text-orange-100 text-xs md:text-sm">Teamwork makes the dream work</p>
             </div>
           </div>
           
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-2">
-            <Button
-              variant={activeTab === 'browse' ? 'secondary' : 'ghost'}
-              onClick={() => onTabChange('browse')}
-              className="text-white hover:bg-orange-600"
-            >
-              <Search className="h-4 w-4 mr-2" />
-              Browse Supplies
-            </Button>
-            <Button
-              variant={activeTab === 'add' ? 'secondary' : 'ghost'}
-              onClick={() => onTabChange('add')}
-              className="text-white hover:bg-orange-600"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Supply
-            </Button>
-            <Button
-              variant={activeTab === 'planner' ? 'secondary' : 'ghost'}
-              onClick={() => onTabChange('planner')}
-              className="text-white hover:bg-orange-600"
-            >
-              <Sparkles className="h-4 w-4 mr-2" />
-              Party Planner
-            </Button>
+            {navigationItems.map(({ key, label, icon: Icon }) => (
+              <Button
+                key={key}
+                variant={activeTab === key ? 'secondary' : 'ghost'}
+                onClick={() => handleTabChange(key)}
+                className="text-white hover:bg-orange-600"
+              >
+                <Icon className="h-4 w-4 mr-2" />
+                {label}
+              </Button>
+            ))}
           </nav>
+
+          {/* Mobile Menu Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden text-white hover:bg-orange-600"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </Button>
         </div>
+
+        {/* Mobile Navigation Menu */}
+        {isMobileMenuOpen && (
+          <nav className="md:hidden mt-4 pb-4 border-t border-orange-300 pt-4">
+            <div className="flex flex-col space-y-2">
+              {navigationItems.map(({ key, label, icon: Icon }) => (
+                <Button
+                  key={key}
+                  variant={activeTab === key ? 'secondary' : 'ghost'}
+                  onClick={() => handleTabChange(key)}
+                  className="w-full justify-start text-white hover:bg-orange-600"
+                >
+                  <Icon className="h-4 w-4 mr-2" />
+                  {label}
+                </Button>
+              ))}
+            </div>
+          </nav>
+        )}
       </div>
     </header>
   );

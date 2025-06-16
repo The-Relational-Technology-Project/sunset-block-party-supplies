@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
+import { HouseRules } from "@/components/HouseRules";
+import { ImageUpload } from "@/components/ImageUpload";
 
 export function AddSupply() {
   const [formData, setFormData] = useState({
@@ -19,7 +21,10 @@ export function AddSupply() {
     zipCode: "",
     location: "",
     partyTypes: [] as string[],
+    image: null as string | null,
   });
+
+  const [houseRules, setHouseRules] = useState<string[]>([]);
 
   const handlePartyTypeChange = (partyType: string, checked: boolean) => {
     setFormData(prev => ({
@@ -37,6 +42,7 @@ export function AddSupply() {
       return;
     }
     
+    console.log("Form submitted with:", { ...formData, houseRules });
     toast.success("Supply added successfully! Thanks for sharing with the community!");
     
     // Reset form
@@ -48,19 +54,21 @@ export function AddSupply() {
       zipCode: "",
       location: "",
       partyTypes: [],
+      image: null,
     });
+    setHouseRules([]);
   };
 
   return (
-    <div className="min-h-screen bg-orange-50 py-8">
+    <div className="min-h-screen bg-orange-50 py-4 md:py-8">
       <div className="container mx-auto px-4 max-w-2xl">
         <Card>
           <CardHeader className="text-center">
             <div className="mx-auto w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mb-4">
               <Plus className="h-8 w-8 text-white" />
             </div>
-            <CardTitle className="text-2xl">Share Your Supplies</CardTitle>
-            <p className="text-gray-600">Help families in the Outer Sunset create amazing birthday parties!</p>
+            <CardTitle className="text-xl md:text-2xl">Share Your Supplies</CardTitle>
+            <p className="text-gray-600 text-sm md:text-base">Help families in the Outer Sunset create amazing birthday parties!</p>
           </CardHeader>
           
           <CardContent>
@@ -88,6 +96,11 @@ export function AddSupply() {
                     required
                   />
                 </div>
+
+                <ImageUpload 
+                  onImageChange={(imageUrl) => setFormData(prev => ({ ...prev, image: imageUrl }))}
+                  currentImage={formData.image}
+                />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -147,7 +160,7 @@ export function AddSupply() {
 
                 <div>
                   <Label>Party Types (Select all that apply)</Label>
-                  <div className="grid grid-cols-2 gap-4 mt-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                     {[
                       'Birthday Party',
                       'Block Party', 
@@ -167,6 +180,11 @@ export function AddSupply() {
                     ))}
                   </div>
                 </div>
+
+                <HouseRules 
+                  rules={houseRules}
+                  onRulesChange={setHouseRules}
+                />
               </div>
 
               <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-lg py-3">
