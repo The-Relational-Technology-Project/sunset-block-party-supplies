@@ -57,11 +57,13 @@ export function JoinRequestsManager() {
 
       let profileId = existingProfile?.id;
 
-      // If no profile exists, create one
+      // If no profile exists, we need to create one with a generated UUID
       if (!profileId) {
+        // Generate a UUID for the new profile
         const { data: newProfile, error: profileError } = await supabase
           .from('profiles')
           .insert({
+            id: crypto.randomUUID(), // Generate a new UUID
             name: request.name,
             email: request.email,
             vouched_at: new Date().toISOString(),
