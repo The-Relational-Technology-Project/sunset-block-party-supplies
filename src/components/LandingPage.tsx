@@ -1,12 +1,34 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Gift, Users, Heart, Search, Plus, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { AuthModal } from "./auth/AuthModal";
 
 interface LandingPageProps {
   onTabChange: (tab: string) => void;
 }
 
 export function LandingPage({ onTabChange }: LandingPageProps) {
+  const [user, setUser] = useState<any>(null);
+  const [modalMode, setModalMode] = useState<'login' | 'signup' | 'join-request' | null>(null);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+
+    checkUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-blue-50">
       {/* Hero Section */}
@@ -32,16 +54,28 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
             From bounce houses to birthday banners - we've got you covered.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" onClick={() => onTabChange('browse')} className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-lg px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
-              <Search className="h-5 w-5 mr-2" />
-              Browse Supplies
-            </Button>
-            <Button size="lg" variant="outline" onClick={() => onTabChange('add')} className="border-2 border-orange-500 text-orange-600 hover:bg-orange-50 text-lg px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
-              <Plus className="h-5 w-5 mr-2" />
-              Share Your Items
-            </Button>
-          </div>
+          {/* Authentication-aware CTAs */}
+          {user ? (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Button size="lg" onClick={() => onTabChange('browse')} className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-lg px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
+                <Search className="h-5 w-5 mr-2" />
+                Browse Supplies
+              </Button>
+              <Button size="lg" variant="outline" onClick={() => onTabChange('add')} className="border-2 border-orange-500 text-orange-600 hover:bg-orange-50 text-lg px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
+                <Plus className="h-5 w-5 mr-2" />
+                Share Your Items
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Button size="lg" onClick={() => setModalMode('login')} className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-lg px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
+                Sign In
+              </Button>
+              <Button size="lg" variant="outline" onClick={() => setModalMode('join-request')} className="border-2 border-orange-500 text-orange-600 hover:bg-orange-50 text-lg px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
+                Request to Join
+              </Button>
+            </div>
+          )}
 
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
@@ -117,12 +151,25 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
           <p className="text-xl mb-8 opacity-95">
             Join your neighbors in making party planning easier and more fun!
           </p>
-          <Button size="lg" variant="secondary" onClick={() => onTabChange('planner')} className="text-lg px-10 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 bg-white text-purple-600 hover:bg-gray-50">
-            <Sparkles className="h-5 w-5 mr-2" />
-            Plan Your Party
-          </Button>
+          {user ? (
+            <Button size="lg" variant="secondary" onClick={() => onTabChange('planner')} className="text-lg px-10 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 bg-white text-purple-600 hover:bg-gray-50">
+              <Sparkles className="h-5 w-5 mr-2" />
+              Plan Your Party
+            </Button>
+          ) : (
+            <Button size="lg" variant="secondary" onClick={() => setModalMode('join-request')} className="text-lg px-10 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 bg-white text-purple-600 hover:bg-gray-50">
+              <Heart className="h-5 w-5 mr-2" />
+              Join Our Community
+            </Button>
+          )}
         </div>
       </section>
+
+      <AuthModal
+        isOpen={modalMode !== null}
+        onClose={() => setModalMode(null)}
+        mode={modalMode || 'login'}
+      />
     </div>
   );
 }
