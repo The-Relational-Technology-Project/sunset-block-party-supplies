@@ -20,6 +20,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           status: Database["public"]["Enums"]["join_request_status"]
+          voucher_id: string | null
         }
         Insert: {
           connection_context?: string | null
@@ -31,6 +32,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["join_request_status"]
+          voucher_id?: string | null
         }
         Update: {
           connection_context?: string | null
@@ -42,11 +44,19 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["join_request_status"]
+          voucher_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "join_requests_reviewed_by_fkey"
             columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "join_requests_voucher_id_fkey"
+            columns: ["voucher_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -59,9 +69,6 @@ export type Database = {
           email: string
           id: string
           intro_text: string | null
-          join_request_status:
-            | Database["public"]["Enums"]["join_request_status"]
-            | null
           name: string
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
@@ -74,9 +81,6 @@ export type Database = {
           email: string
           id: string
           intro_text?: string | null
-          join_request_status?:
-            | Database["public"]["Enums"]["join_request_status"]
-            | null
           name: string
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
@@ -89,9 +93,6 @@ export type Database = {
           email?: string
           id?: string
           intro_text?: string | null
-          join_request_status?:
-            | Database["public"]["Enums"]["join_request_status"]
-            | null
           name?: string
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
@@ -210,7 +211,7 @@ export type Database = {
       }
     }
     Enums: {
-      join_request_status: "pending" | "approved" | "rejected"
+      join_request_status: "pending" | "vouched" | "rejected"
       user_role: "member" | "steward"
     }
     CompositeTypes: {
@@ -327,7 +328,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      join_request_status: ["pending", "approved", "rejected"],
+      join_request_status: ["pending", "vouched", "rejected"],
       user_role: ["member", "steward"],
     },
   },

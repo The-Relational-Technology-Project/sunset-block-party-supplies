@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle, XCircle, Clock } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Heart } from "lucide-react";
 
 interface JoinRequest {
   id: string;
@@ -13,8 +13,9 @@ interface JoinRequest {
   email: string;
   intro: string;
   connection_context: string | null;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'vouched' | 'rejected';
   requested_at: string;
+  voucher_id: string | null;
 }
 
 export function JoinRequestsManager() {
@@ -42,32 +43,81 @@ export function JoinRequestsManager() {
     }
   };
 
-  const handleApprove = async (request: JoinRequest) => {
+  const handleVouchForApplicant = async (request: JoinRequest) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Update join request status
-      const { error: updateError } = await supabase
+      // First, check if a profile already exists for this email
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', request.email)
+        .maybeSingle();
+
+      let profileId = existingProfile?.id;
+
+      // If no profile exists, create one
+      if (!profileId) {
+        const { data: newProfile, error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            name: request.name,
+            email: request.email,
+            vouched_at: new Date().toISOString(),
+            vouched_by: user.id
+          })
+          .select('id')
+          .single();
+
+        if (profileError) throw profileError;
+        profileId = newProfile.id;
+      } else {
+        // Update existing profile to mark as vouched
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            vouched_at: new Date().toISOString(),
+            vouched_by: user.id
+          })
+          .eq('id', profileId);
+
+        if (updateError) throw updateError;
+      }
+
+      // Create a vouch record
+      const { error: vouchError } = await supabase
+        .from('vouches')
+        .insert({
+          voucher_id: user.id,
+          vouched_id: profileId,
+          vouch_note: `Vouched through join request application review`
+        });
+
+      if (vouchError) throw vouchError;
+
+      // Update the join request status to 'vouched' and set voucher_id
+      const { error: requestError } = await supabase
         .from('join_requests')
         .update({
-          status: 'approved',
+          status: 'vouched',
+          voucher_id: user.id,
           reviewed_by: user.id,
           reviewed_at: new Date().toISOString()
         })
         .eq('id', request.id);
 
-      if (updateError) throw updateError;
+      if (requestError) throw requestError;
 
       toast({
-        title: "Application approved",
-        description: `${request.name} can now create an account and will be eligible for vouching.`
+        title: "Applicant vouched successfully!",
+        description: `${request.name} is now a vouched community member and can sign up for full access.`
       });
 
       fetchRequests();
     } catch (error: any) {
       toast({
-        title: "Error approving request",
+        title: "Error vouching for applicant",
         description: error.message,
         variant: "destructive"
       });
@@ -140,13 +190,13 @@ export function JoinRequestsManager() {
             <TableCell>
               <Badge 
                 variant={
-                  request.status === 'approved' ? 'default' : 
+                  request.status === 'vouched' ? 'default' : 
                   request.status === 'rejected' ? 'destructive' : 
                   'secondary'
                 }
               >
                 {request.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
-                {request.status === 'approved' && <CheckCircle className="h-3 w-3 mr-1" />}
+                {request.status === 'vouched' && <Heart className="h-3 w-3 mr-1" />}
                 {request.status === 'rejected' && <XCircle className="h-3 w-3 mr-1" />}
                 {request.status}
               </Badge>
@@ -159,11 +209,11 @@ export function JoinRequestsManager() {
                 <div className="space-x-2">
                   <Button 
                     size="sm" 
-                    onClick={() => handleApprove(request)}
-                    className="bg-green-600 hover:bg-green-700"
+                    onClick={() => handleVouchForApplicant(request)}
+                    className="bg-pink-600 hover:bg-pink-700"
                   >
-                    <CheckCircle className="h-4 w-4 mr-1" />
-                    Approve
+                    <Heart className="h-4 w-4 mr-1" />
+                    Vouch & Accept
                   </Button>
                   <Button 
                     size="sm" 

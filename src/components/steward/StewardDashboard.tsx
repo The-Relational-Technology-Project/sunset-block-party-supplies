@@ -14,19 +14,19 @@ export function StewardDashboard() {
         <Shield className="h-8 w-8 text-orange-500" />
         <div>
           <h1 className="text-3xl font-bold">Steward Dashboard</h1>
-          <p className="text-gray-600">Manage community members and join requests</p>
+          <p className="text-gray-600">Manage community applications and member vouching</p>
         </div>
       </div>
 
       <Tabs defaultValue="requests" className="space-y-4">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="requests" className="flex items-center gap-2">
-            <UserCheck className="h-4 w-4" />
-            Join Requests
+            <Heart className="h-4 w-4" />
+            Join Requests & Vouching
           </TabsTrigger>
           <TabsTrigger value="vouching" className="flex items-center gap-2">
-            <Heart className="h-4 w-4" />
-            Member Vouching
+            <UserCheck className="h-4 w-4" />
+            Additional Vouching
           </TabsTrigger>
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
@@ -37,9 +37,10 @@ export function StewardDashboard() {
         <TabsContent value="requests">
           <Card>
             <CardHeader>
-              <CardTitle>Pending Join Requests</CardTitle>
+              <CardTitle>Join Requests & Vouching</CardTitle>
               <CardDescription>
-                Review and approve new member applications
+                Review applications and vouch for new community members. When you vouch for someone,
+                they become a trusted member who can access all community features.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -51,9 +52,10 @@ export function StewardDashboard() {
         <TabsContent value="vouching">
           <Card>
             <CardHeader>
-              <CardTitle>Member Vouching</CardTitle>
+              <CardTitle>Additional Member Vouching</CardTitle>
               <CardDescription>
-                Vouch for approved members to give them full community access
+                Vouch for existing members who haven't been vouched yet, or members who joined 
+                through other means but need community vouching.
               </CardDescription>
             </CardHeader>
             <CardContent>
