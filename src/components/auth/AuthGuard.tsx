@@ -9,9 +9,10 @@ import { Heart, Shield, Users } from "lucide-react";
 interface AuthGuardProps {
   children: React.ReactNode;
   requireVouched?: boolean;
+  requireSteward?: boolean;
 }
 
-export function AuthGuard({ children, requireVouched = false }: AuthGuardProps) {
+export function AuthGuard({ children, requireVouched = false, requireSteward = false }: AuthGuardProps) {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -89,6 +90,36 @@ export function AuthGuard({ children, requireVouched = false }: AuthGuardProps) 
             </Card>
           )}
         </div>
+      </div>
+    );
+  }
+
+  if (requireSteward && profile?.role !== 'steward') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center p-4">
+        <Card className="max-w-md">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <div className="bg-orange-500 p-3 rounded-full">
+                <Shield className="h-8 w-8 text-white" />
+              </div>
+            </div>
+            <CardTitle>Steward Access Required</CardTitle>
+            <CardDescription>
+              You need steward privileges to access this area
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-sm text-muted-foreground">
+              This section is only available to community stewards who help manage 
+              member applications and maintain our trust-based system.
+            </p>
+            <div className="flex items-center justify-center gap-2 text-sm text-orange-600">
+              <Shield className="h-4 w-4" />
+              <span>Protected steward area</span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
