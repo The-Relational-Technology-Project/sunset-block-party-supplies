@@ -1,5 +1,5 @@
 
-import { Gift, Search, Plus, Sparkles, Menu, X } from "lucide-react";
+import { Gift, Search, Plus, Sparkles, Menu, X, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { AuthButtons } from "./auth/AuthButtons";
@@ -15,17 +15,39 @@ interface HeaderProps {
 export function Header({ activeTab, onTabChange }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
 
   useEffect(() => {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
+      
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        setUserProfile(profile);
+      }
     };
 
     checkUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user || null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const currentUser = session?.user || null;
+      setUser(currentUser);
+      
+      if (currentUser) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single();
+        setUserProfile(profile);
+      } else {
+        setUserProfile(null);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -44,6 +66,15 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
     label: 'Party Planner',
     icon: Sparkles
   }];
+
+  // Add steward dashboard for stewards
+  if (userProfile?.role === 'steward') {
+    navigationItems.push({
+      key: 'steward',
+      label: 'Steward Dashboard',
+      icon: Shield
+    });
+  }
 
   const handleTabChange = (tab: string) => {
     onTabChange(tab);

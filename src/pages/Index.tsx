@@ -5,6 +5,7 @@ import { LandingPage } from "@/components/LandingPage";
 import { BrowseSupplies } from "@/components/BrowseSupplies";
 import { AddSupply } from "@/components/AddSupply";
 import { PartyPlanner } from "@/components/PartyPlanner";
+import { StewardDashboard } from "@/components/steward/StewardDashboard";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 
 const Index = () => {
@@ -28,6 +29,12 @@ const Index = () => {
         return (
           <AuthGuard requireVouched>
             <PartyPlanner />
+          </AuthGuard>
+        );
+      case 'steward':
+        return (
+          <AuthGuard requireSteward>
+            <StewardDashboard />
           </AuthGuard>
         );
       default:
