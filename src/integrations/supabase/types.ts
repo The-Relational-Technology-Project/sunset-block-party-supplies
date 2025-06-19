@@ -9,16 +9,162 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      join_requests: {
+        Row: {
+          connection_context: string | null
+          email: string
+          id: string
+          intro: string
+          name: string
+          requested_at: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["join_request_status"]
+        }
+        Insert: {
+          connection_context?: string | null
+          email: string
+          id?: string
+          intro: string
+          name: string
+          requested_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["join_request_status"]
+        }
+        Update: {
+          connection_context?: string | null
+          email?: string
+          id?: string
+          intro?: string
+          name?: string
+          requested_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["join_request_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "join_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          intro_text: string | null
+          join_request_status:
+            | Database["public"]["Enums"]["join_request_status"]
+            | null
+          name: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          vouched_at: string | null
+          vouched_by: string | null
+          zip_code: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          intro_text?: string | null
+          join_request_status?:
+            | Database["public"]["Enums"]["join_request_status"]
+            | null
+          name: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          vouched_at?: string | null
+          vouched_by?: string | null
+          zip_code?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          intro_text?: string | null
+          join_request_status?:
+            | Database["public"]["Enums"]["join_request_status"]
+            | null
+          name?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          vouched_at?: string | null
+          vouched_by?: string | null
+          zip_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_vouched_by_fkey"
+            columns: ["vouched_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vouches: {
+        Row: {
+          created_at: string
+          id: string
+          vouch_note: string | null
+          vouched_id: string
+          voucher_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          vouch_note?: string | null
+          vouched_id: string
+          voucher_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          vouch_note?: string | null
+          vouched_id?: string
+          voucher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vouches_vouched_id_fkey"
+            columns: ["vouched_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vouches_voucher_id_fkey"
+            columns: ["voucher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_user_steward: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
+      is_user_vouched: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      join_request_status: "pending" | "approved" | "rejected"
+      user_role: "member" | "steward"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +279,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      join_request_status: ["pending", "approved", "rejected"],
+      user_role: ["member", "steward"],
+    },
   },
 } as const

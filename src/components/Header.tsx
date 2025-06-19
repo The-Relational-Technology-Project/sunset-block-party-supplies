@@ -1,15 +1,36 @@
+
 import { Gift, Search, Plus, Sparkles, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { AuthButtons } from "./auth/AuthButtons";
+import { UserProfile } from "./auth/UserProfile";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
 interface HeaderProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
-export function Header({
-  activeTab,
-  onTabChange
-}: HeaderProps) {
+
+export function Header({ activeTab, onTabChange }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+
+    checkUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const navigationItems = [{
     key: 'browse',
     label: 'Browse Supplies',
@@ -23,11 +44,14 @@ export function Header({
     label: 'Party Planner',
     icon: Sparkles
   }];
+
   const handleTabChange = (tab: string) => {
     onTabChange(tab);
     setIsMobileMenuOpen(false);
   };
-  return <header className="bg-gradient-to-r from-orange-400 to-orange-500 text-white shadow-lg">
+
+  return (
+    <header className="bg-gradient-to-r from-orange-400 to-orange-500 text-white shadow-lg">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2 cursor-pointer" onClick={() => handleTabChange('home')}>
@@ -38,37 +62,68 @@ export function Header({
             </div>
           </div>
           
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-2">
-            {navigationItems.map(({
-            key,
-            label,
-            icon: Icon
-          }) => <Button key={key} variant={activeTab === key ? 'secondary' : 'ghost'} onClick={() => handleTabChange(key)} className="text-white hover:bg-orange-600">
-                <Icon className="h-4 w-4 mr-2" />
-                {label}
-              </Button>)}
-          </nav>
+          {/* Desktop Navigation & Auth */}
+          <div className="hidden md:flex items-center space-x-4">
+            {user && (
+              <nav className="flex space-x-2">
+                {navigationItems.map(({ key, label, icon: Icon }) => (
+                  <Button 
+                    key={key} 
+                    variant={activeTab === key ? 'secondary' : 'ghost'} 
+                    onClick={() => handleTabChange(key)} 
+                    className="text-white hover:bg-orange-600"
+                  >
+                    <Icon className="h-4 w-4 mr-2" />
+                    {label}
+                  </Button>
+                ))}
+              </nav>
+            )}
+            
+            {user ? <UserProfile /> : <AuthButtons />}
+          </div>
 
           {/* Mobile Menu Button */}
-          <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-orange-600" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="md:hidden text-white hover:bg-orange-600" 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
             {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </Button>
         </div>
 
         {/* Mobile Navigation Menu */}
-        {isMobileMenuOpen && <nav className="md:hidden mt-4 pb-4 border-t border-orange-300 pt-4">
+        {isMobileMenuOpen && (
+          <nav className="md:hidden mt-4 pb-4 border-t border-orange-300 pt-4">
             <div className="flex flex-col space-y-2">
-              {navigationItems.map(({
-            key,
-            label,
-            icon: Icon
-          }) => <Button key={key} variant={activeTab === key ? 'secondary' : 'ghost'} onClick={() => handleTabChange(key)} className="w-full justify-start text-white hover:bg-orange-600">
-                  <Icon className="h-4 w-4 mr-2" />
-                  {label}
-                </Button>)}
+              {user ? (
+                <>
+                  {navigationItems.map(({ key, label, icon: Icon }) => (
+                    <Button 
+                      key={key} 
+                      variant={activeTab === key ? 'secondary' : 'ghost'} 
+                      onClick={() => handleTabChange(key)} 
+                      className="w-full justify-start text-white hover:bg-orange-600"
+                    >
+                      <Icon className="h-4 w-4 mr-2" />
+                      {label}
+                    </Button>
+                  ))}
+                  <div className="pt-2 border-t border-orange-300 mt-2">
+                    <UserProfile />
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-2">
+                  <AuthButtons />
+                </div>
+              )}
             </div>
-          </nav>}
+          </nav>
+        )}
       </div>
-    </header>;
+    </header>
+  );
 }
