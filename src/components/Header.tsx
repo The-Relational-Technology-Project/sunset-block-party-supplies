@@ -20,6 +20,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
   useEffect(() => {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
+      console.log("Header: Current user:", user);
       setUser(user);
       
       if (user) {
@@ -28,6 +29,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
           .select('*')
           .eq('id', user.id)
           .single();
+        console.log("Header: User profile:", profile);
         setUserProfile(profile);
       }
     };
@@ -36,6 +38,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       const currentUser = session?.user || null;
+      console.log("Header: Auth state changed:", event, currentUser);
       setUser(currentUser);
       
       if (currentUser) {
@@ -44,6 +47,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
           .select('*')
           .eq('id', currentUser.id)
           .single();
+        console.log("Header: Updated profile:", profile);
         setUserProfile(profile);
       } else {
         setUserProfile(null);
@@ -68,7 +72,9 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
   }];
 
   // Add steward dashboard for stewards
+  console.log("Header: Checking steward status:", userProfile?.role);
   if (userProfile?.role === 'steward') {
+    console.log("Header: Adding steward dashboard to navigation");
     navigationItems.push({
       key: 'steward',
       label: 'Steward Dashboard',
@@ -102,7 +108,11 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
                     key={key} 
                     variant={activeTab === key ? 'secondary' : 'ghost'} 
                     onClick={() => handleTabChange(key)} 
-                    className="text-white hover:bg-orange-600"
+                    className={`text-white transition-colors ${
+                      activeTab === key 
+                        ? 'bg-white text-orange-500 hover:bg-gray-100 hover:text-orange-600' 
+                        : 'hover:bg-orange-600 hover:text-white'
+                    }`}
                   >
                     <Icon className="h-4 w-4 mr-2" />
                     {label}
@@ -136,7 +146,11 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
                       key={key} 
                       variant={activeTab === key ? 'secondary' : 'ghost'} 
                       onClick={() => handleTabChange(key)} 
-                      className="w-full justify-start text-white hover:bg-orange-600"
+                      className={`w-full justify-start text-white transition-colors ${
+                        activeTab === key 
+                          ? 'bg-white text-orange-500 hover:bg-gray-100 hover:text-orange-600' 
+                          : 'hover:bg-orange-600 hover:text-white'
+                      }`}
                     >
                       <Icon className="h-4 w-4 mr-2" />
                       {label}
