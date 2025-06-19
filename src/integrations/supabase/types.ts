@@ -109,6 +109,53 @@ export type Database = {
           },
         ]
       }
+      supplies: {
+        Row: {
+          category: string
+          condition: string
+          created_at: string
+          date_available: string | null
+          description: string
+          id: string
+          name: string
+          owner_id: string
+          party_types: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          condition: string
+          created_at?: string
+          date_available?: string | null
+          description: string
+          id?: string
+          name: string
+          owner_id: string
+          party_types?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          condition?: string
+          created_at?: string
+          date_available?: string | null
+          description?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          party_types?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplies_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vouches: {
         Row: {
           created_at: string

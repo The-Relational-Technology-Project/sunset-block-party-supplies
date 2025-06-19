@@ -1,13 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Gift, Users, Heart, Search, Plus, Sparkles } from "lucide-react";
+
 interface LandingPageProps {
   onTabChange: (tab: string) => void;
 }
-export function LandingPage({
-  onTabChange
-}: LandingPageProps) {
-  return <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-blue-50">
+
+export function LandingPage({ onTabChange }: LandingPageProps) {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-blue-50">
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 text-center">
         <div className="max-w-4xl mx-auto">
@@ -122,5 +123,6 @@ export function LandingPage({
           </Button>
         </div>
       </section>
-    </div>;
+    </div>
+  );
 }

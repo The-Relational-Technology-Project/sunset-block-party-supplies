@@ -31,7 +31,7 @@ const Index = () => {
           </AuthGuard>
         );
       default:
-        return <LandingPage />;
+        return <LandingPage onTabChange={setActiveTab} />;
     }
   };
 

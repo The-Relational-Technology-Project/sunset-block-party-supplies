@@ -4,21 +4,20 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { SupplyCard } from "./SupplyCard";
+import { ContactModal } from "./ContactModal";
 import { Supply } from "@/types/supply";
-import { Search, Grid, List } from "lucide-react";
+import { useSupplies } from "@/hooks/useSupplies";
+import { Search, Grid, List, Loader2 } from "lucide-react";
 
-interface BrowseSuppliesProps {
-  supplies: Supply[];
-  onViewContact: (supply: Supply) => void;
-}
-
-export function BrowseSupplies({ supplies, onViewContact }: BrowseSuppliesProps) {
+export function BrowseSupplies() {
+  const { supplies, loading } = useSupplies();
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [conditionFilter, setConditionFilter] = useState("all");
   const [partyTypeFilter, setPartyTypeFilter] = useState("all");
   const [zipCodeFilter, setZipCodeFilter] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [selectedSupply, setSelectedSupply] = useState<Supply | null>(null);
 
   const filteredSupplies = useMemo(() => {
     return supplies.filter((supply) => {
@@ -33,6 +32,17 @@ export function BrowseSupplies({ supplies, onViewContact }: BrowseSuppliesProps)
       return matchesSearch && matchesCategory && matchesCondition && matchesPartyType && matchesZip;
     });
   }, [supplies, searchTerm, categoryFilter, conditionFilter, partyTypeFilter, zipCodeFilter]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-orange-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-orange-500" />
+          <p className="text-gray-600">Loading supplies...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-orange-50">
@@ -128,7 +138,7 @@ export function BrowseSupplies({ supplies, onViewContact }: BrowseSuppliesProps)
             <SupplyCard
               key={supply.id}
               supply={supply}
-              onViewContact={onViewContact}
+              onViewContact={setSelectedSupply}
             />
           ))}
         </div>
@@ -141,6 +151,12 @@ export function BrowseSupplies({ supplies, onViewContact }: BrowseSuppliesProps)
           </div>
         )}
       </div>
+
+      <ContactModal
+        supply={selectedSupply}
+        isOpen={!!selectedSupply}
+        onClose={() => setSelectedSupply(null)}
+      />
     </div>
   );
 }
