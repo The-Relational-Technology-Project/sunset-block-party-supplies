@@ -2,10 +2,11 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Users, Heart, UserCheck } from "lucide-react";
+import { Shield, Users, Heart, UserCheck, Settings } from "lucide-react";
 import { JoinRequestsManager } from "./JoinRequestsManager";
 import { MemberVouchingManager } from "./MemberVouchingManager";
 import { CommunityOverview } from "./CommunityOverview";
+import { BulkCreateUsers } from "./BulkCreateUsers";
 
 export function StewardDashboard() {
   return (
@@ -19,7 +20,7 @@ export function StewardDashboard() {
       </div>
 
       <Tabs defaultValue="requests" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="requests" className="flex items-center gap-2">
             <Heart className="h-4 w-4" />
             Join Requests & Vouching
@@ -31,6 +32,10 @@ export function StewardDashboard() {
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Community Overview
+          </TabsTrigger>
+          <TabsTrigger value="bulk-create" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Bulk Create Users
           </TabsTrigger>
         </TabsList>
 
@@ -76,6 +81,9 @@ export function StewardDashboard() {
               <CommunityOverview />
             </CardContent>
           </Card>
+        </TabsContent>
+        <TabsContent value="bulk-create">
+          <BulkCreateUsers />
         </TabsContent>
       </Tabs>
     </div>
