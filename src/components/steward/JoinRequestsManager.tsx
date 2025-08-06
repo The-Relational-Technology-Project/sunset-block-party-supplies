@@ -48,7 +48,7 @@ export function JoinRequestsManager() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // First, check if a profile already exists for this email
+      // Check if a profile already exists for this email
       const { data: existingProfile } = await supabase
         .from('profiles')
         .select('id')
@@ -57,24 +57,8 @@ export function JoinRequestsManager() {
 
       let profileId = existingProfile?.id;
 
-      // If no profile exists, we need to create one with a generated UUID
-      if (!profileId) {
-        // Generate a UUID for the new profile
-        const { data: newProfile, error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: crypto.randomUUID(), // Generate a new UUID
-            name: request.name,
-            email: request.email,
-            vouched_at: new Date().toISOString(),
-            vouched_by: user.id
-          })
-          .select('id')
-          .single();
-
-        if (profileError) throw profileError;
-        profileId = newProfile.id;
-      } else {
+      // If profile exists, just vouch them
+      if (profileId) {
         // Update existing profile to mark as vouched
         const { error: updateError } = await supabase
           .from('profiles')
@@ -85,6 +69,14 @@ export function JoinRequestsManager() {
           .eq('id', profileId);
 
         if (updateError) throw updateError;
+      } else {
+        // No profile exists - they need to sign up first
+        toast({
+          title: "Account needed first",
+          description: `${request.name} needs to create an account first before being vouched. Send them the join link or ask them to sign up.`,
+          variant: "destructive"
+        });
+        return;
       }
 
       // Create a vouch record
