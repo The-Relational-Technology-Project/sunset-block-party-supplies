@@ -17,10 +17,10 @@ export function AuthButtons() {
           Sign In
         </Button>
         <Button 
-          onClick={() => setModalMode('join-request')}
+          onClick={() => setModalMode('signup')}
           className="bg-orange-500 hover:bg-orange-600"
         >
-          Request to Join
+          Join the Party
         </Button>
       </div>
       

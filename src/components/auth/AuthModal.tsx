@@ -37,10 +37,18 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
 
   const handleSignup = async () => {
     setLoading(true);
+    const redirectUrl = `${window.location.origin}/`;
+    
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { name } }
+      options: { 
+        data: { 
+          name,
+          connection_context: connectionContext 
+        },
+        emailRedirectTo: redirectUrl
+      }
     });
     if (error) {
       toast({ title: "Signup failed", description: error.message, variant: "destructive" });
@@ -77,7 +85,7 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
   const getTitle = () => {
     switch (mode) {
       case 'login': return 'Welcome Back';
-      case 'signup': return 'Join Our Community';
+      case 'signup': return 'Join the Party';
       case 'join-request': return 'Request to Join';
     }
   };
@@ -138,15 +146,27 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
           ) : (
             <>
               {mode === 'signup' && (
-                <div>
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Your full name"
-                  />
-                </div>
+                <>
+                  <div>
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input
+                      id="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Your full name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="connection">How did you hear about us?</Label>
+                    <Textarea
+                      id="connection"
+                      value={connectionContext}
+                      onChange={(e) => setConnectionContext(e.target.value)}
+                      placeholder="Who referred you or how did you find out about this community?"
+                      rows={2}
+                    />
+                  </div>
+                </>
               )}
               <div>
                 <Label htmlFor="email">Email</Label>
