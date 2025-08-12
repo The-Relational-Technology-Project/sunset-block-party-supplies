@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,8 +20,24 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
   const [name, setName] = useState("");
   const [intro, setIntro] = useState("");
   const [connectionContext, setConnectionContext] = useState("");
+  const [honeypot, setHoneypot] = useState(""); // Bot detection
+  const [captchaAnswer, setCaptchaAnswer] = useState("");
+  const [captchaQuestion, setCaptchaQuestion] = useState({ question: "", answer: 0 });
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  // Generate math captcha when component mounts or mode changes to signup
+  useEffect(() => {
+    if (mode === 'signup') {
+      const num1 = Math.floor(Math.random() * 10) + 1;
+      const num2 = Math.floor(Math.random() * 10) + 1;
+      setCaptchaQuestion({
+        question: `What is ${num1} + ${num2}?`,
+        answer: num1 + num2
+      });
+      setCaptchaAnswer("");
+    }
+  }, [mode]);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -37,6 +53,20 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
 
   const handleSignup = async () => {
     setLoading(true);
+    
+    // Bot protection checks
+    if (honeypot.trim() !== "") {
+      toast({ title: "Signup failed", description: "Please try again.", variant: "destructive" });
+      setLoading(false);
+      return;
+    }
+    
+    if (parseInt(captchaAnswer) !== captchaQuestion.answer) {
+      toast({ title: "Incorrect answer", description: "Please solve the math problem correctly.", variant: "destructive" });
+      setLoading(false);
+      return;
+    }
+    
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
@@ -164,6 +194,28 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
                       onChange={(e) => setConnectionContext(e.target.value)}
                       placeholder="Who referred you or how did you find out about this community?"
                       rows={2}
+                    />
+                  </div>
+                  
+                  {/* Honeypot field - hidden from users, only bots fill this */}
+                  <div style={{ display: 'none' }}>
+                    <Input
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                      placeholder="Leave this empty"
+                      tabIndex={-1}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="captcha">{captchaQuestion.question}</Label>
+                    <Input
+                      id="captcha"
+                      type="number"
+                      value={captchaAnswer}
+                      onChange={(e) => setCaptchaAnswer(e.target.value)}
+                      placeholder="Enter the answer"
+                      required
                     />
                   </div>
                 </>
