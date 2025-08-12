@@ -162,45 +162,6 @@ export type Database = {
           },
         ]
       }
-      vouches: {
-        Row: {
-          created_at: string
-          id: string
-          vouch_note: string | null
-          vouched_id: string
-          voucher_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          vouch_note?: string | null
-          vouched_id: string
-          voucher_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          vouch_note?: string | null
-          vouched_id?: string
-          voucher_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "vouches_vouched_id_fkey"
-            columns: ["vouched_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vouches_voucher_id_fkey"
-            columns: ["voucher_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       [_ in never]: never
