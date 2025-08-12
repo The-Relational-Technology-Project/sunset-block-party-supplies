@@ -3,10 +3,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { User, LogOut, Shield, Heart, UserPlus } from "lucide-react";
+import { User, LogOut, Shield, Heart } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { InviteMember } from "../InviteMember";
 
 interface Profile {
   id: string;
@@ -18,7 +16,6 @@ interface Profile {
 
 export function UserProfile() {
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [showInviteModal, setShowInviteModal] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -83,27 +80,12 @@ export function UserProfile() {
             </div>
           </div>
           <DropdownMenuSeparator />
-          {isVouched && (
-            <DropdownMenuItem onClick={() => setShowInviteModal(true)}>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Invite Someone
-            </DropdownMenuItem>
-          )}
           <DropdownMenuItem onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" />
             Sign Out
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
-      <Dialog open={showInviteModal} onOpenChange={setShowInviteModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Invite a New Member</DialogTitle>
-          </DialogHeader>
-          <InviteMember />
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

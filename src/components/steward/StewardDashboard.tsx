@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, Users, Heart, UserCheck, Settings } from "lucide-react";
 import { JoinRequestsManager } from "./JoinRequestsManager";
-import { MemberVouchingManager } from "./MemberVouchingManager";
 import { CommunityOverview } from "./CommunityOverview";
 import { BulkCreateUsers } from "./BulkCreateUsers";
 
@@ -20,14 +19,10 @@ export function StewardDashboard() {
       </div>
 
       <Tabs defaultValue="requests" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="requests" className="flex items-center gap-2">
             <Heart className="h-4 w-4" />
-            Join Requests & Vouching
-          </TabsTrigger>
-          <TabsTrigger value="vouching" className="flex items-center gap-2">
-            <UserCheck className="h-4 w-4" />
-            Additional Vouching
+            Join Requests
           </TabsTrigger>
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
@@ -42,29 +37,13 @@ export function StewardDashboard() {
         <TabsContent value="requests">
           <Card>
             <CardHeader>
-              <CardTitle>Join Requests & Vouching</CardTitle>
+              <CardTitle>Join Requests</CardTitle>
               <CardDescription>
-                Review applications and vouch for new community members. When you vouch for someone,
-                they become a trusted member who can access all community features.
+                Review and approve applications from people who want to join the community.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <JoinRequestsManager />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="vouching">
-          <Card>
-            <CardHeader>
-              <CardTitle>Additional Member Vouching</CardTitle>
-              <CardDescription>
-                Vouch for existing members who haven't been vouched yet, or members who joined 
-                through other means but need community vouching.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <MemberVouchingManager />
             </CardContent>
           </Card>
         </TabsContent>
