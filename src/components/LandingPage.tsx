@@ -12,7 +12,7 @@ interface LandingPageProps {
 
 export function LandingPage({ onTabChange }: LandingPageProps) {
   const [user, setUser] = useState<any>(null);
-  const [modalMode, setModalMode] = useState<'login' | 'signup' | 'join-request' | null>(null);
+  const [modalMode, setModalMode] = useState<'login' | 'signup' | null>(null);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -71,8 +71,8 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
               <Button size="lg" onClick={() => setModalMode('login')} className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-lg px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
                 Sign In
               </Button>
-              <Button size="lg" variant="outline" onClick={() => setModalMode('join-request')} className="border-2 border-orange-500 text-orange-600 hover:bg-orange-50 text-lg px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
-                Request to Join
+              <Button size="lg" variant="outline" onClick={() => setModalMode('signup')} className="border-2 border-orange-500 text-orange-600 hover:bg-orange-50 text-lg px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
+                Join the Party
               </Button>
             </div>
           )}
@@ -157,7 +157,7 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
               Plan Your Party
             </Button>
           ) : (
-            <Button size="lg" variant="secondary" onClick={() => setModalMode('join-request')} className="text-lg px-10 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 bg-white text-purple-600 hover:bg-gray-50">
+            <Button size="lg" variant="secondary" onClick={() => setModalMode('signup')} className="text-lg px-10 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 bg-white text-purple-600 hover:bg-gray-50">
               <Heart className="h-5 w-5 mr-2" />
               Join Our Community
             </Button>
