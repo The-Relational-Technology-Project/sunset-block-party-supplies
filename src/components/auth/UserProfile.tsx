@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { User, LogOut, Shield, Heart } from "lucide-react";
+import { User, LogOut, Shield, Heart, Package } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
 interface Profile {
@@ -80,6 +80,10 @@ export function UserProfile() {
             </div>
           </div>
           <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => window.location.href = '/my-supplies'}>
+            <Package className="mr-2 h-4 w-4" />
+            My Supplies
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" />
             Sign Out
