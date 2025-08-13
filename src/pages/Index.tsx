@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { LandingPage } from "@/components/LandingPage";
 import { BrowseSupplies } from "@/components/BrowseSupplies";
@@ -10,11 +11,20 @@ import { AuthGuard } from "@/components/auth/AuthGuard";
 import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('home');
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check for tab parameter in URL
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['browse', 'add', 'planner', 'steward'].includes(tabParam)) {
+      setActiveTab(tabParam);
+      // Clear the URL parameter after setting the tab
+      setSearchParams({});
+    }
+
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
@@ -29,7 +39,7 @@ const Index = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [searchParams, setSearchParams]);
 
   // Show loading state while checking authentication
   if (loading) {

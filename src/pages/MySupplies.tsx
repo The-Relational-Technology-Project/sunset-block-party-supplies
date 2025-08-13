@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import { Edit2, Save, X, Trash2, ArrowLeft } from "lucide-react";
 import { Header } from "@/components/Header";
 
 export default function MySupplies() {
+  const navigate = useNavigate();
   const [supplies, setSupplies] = useState<Supply[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -148,13 +150,17 @@ export default function MySupplies() {
   };
 
   const handleGoBack = () => {
-    window.history.back();
+    navigate('/');
+  };
+
+  const handleTabChange = (tab: string) => {
+    navigate(`/?tab=${tab}`);
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header activeTab="" onTabChange={() => {}} />
+        <Header activeTab="" onTabChange={handleTabChange} />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Loading your supplies...</div>
         </div>
@@ -164,7 +170,7 @@ export default function MySupplies() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header activeTab="" onTabChange={() => {}} />
+      <Header activeTab="" onTabChange={handleTabChange} />
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center gap-4 mb-6">
           <Button variant="ghost" onClick={handleGoBack} className="flex items-center gap-2">
