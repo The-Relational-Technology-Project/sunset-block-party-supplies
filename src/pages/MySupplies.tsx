@@ -46,6 +46,7 @@ export default function MySupplies() {
         partyTypes: item.party_types || [],
         dateAvailable: item.date_available || new Date().toISOString().split('T')[0],
         location: item.location,
+        contactEmail: item.contact_email,
         image: item.image_url,
         houseRules: item.house_rules || [],
         owner: {
@@ -81,7 +82,7 @@ export default function MySupplies() {
     if (!editingId || !editForm) return;
 
     try {
-      const { error } = await supabase
+        const { error } = await supabase
         .from('supplies')
         .update({
           name: editForm.name,
@@ -91,6 +92,7 @@ export default function MySupplies() {
           party_types: editForm.partyTypes,
           date_available: editForm.dateAvailable,
           location: editForm.location,
+          contact_email: editForm.contactEmail,
           house_rules: editForm.houseRules,
         })
         .eq('id', editingId);
@@ -241,6 +243,12 @@ export default function MySupplies() {
                         value={editForm.location || ''}
                         onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
                         placeholder="Location (e.g., San Francisco, CA)"
+                      />
+                      <Input
+                        type="email"
+                        value={editForm.contactEmail || ''}
+                        onChange={(e) => setEditForm({ ...editForm, contactEmail: e.target.value })}
+                        placeholder="Contact email"
                       />
                       <Input
                         type="date"

@@ -33,6 +33,7 @@ export function useSupplies() {
         partyTypes: item.party_types || [],
         dateAvailable: item.date_available || new Date().toISOString().split('T')[0],
         location: item.location,
+        contactEmail: item.contact_email,
         image: item.image_url,
         houseRules: item.house_rules || [],
         owner: {

@@ -24,6 +24,7 @@ export function AddSupply() {
     condition: "",
     zipCode: "",
     location: "",
+    contactEmail: "",
     partyTypes: [] as string[],
     image: null as string | null,
   });
@@ -50,7 +51,7 @@ export function AddSupply() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.description || !formData.category || !formData.condition) {
+    if (!formData.name || !formData.description || !formData.category || !formData.condition || !formData.contactEmail) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -66,7 +67,7 @@ export function AddSupply() {
       const { data, error } = await supabase
         .from('supplies')
         .insert([
-          {
+           {
             name: formData.name,
             description: formData.description,
             category: formData.category,
@@ -74,6 +75,7 @@ export function AddSupply() {
             party_types: formData.partyTypes,
             zip_code: formData.zipCode,
             location: formData.location,
+            contact_email: formData.contactEmail,
             image_url: formData.image,
             house_rules: houseRules,
             owner_id: user.id
@@ -101,6 +103,7 @@ export function AddSupply() {
         condition: "",
         zipCode: "",
         location: "",
+        contactEmail: "",
         partyTypes: [],
         image: null,
       });
@@ -211,6 +214,19 @@ export function AddSupply() {
                       onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
                     />
                   </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="contactEmail">Contact Email *</Label>
+                  <Input
+                    id="contactEmail"
+                    type="email"
+                    placeholder="Best email to reach you about this supply"
+                    value={formData.contactEmail}
+                    onChange={(e) => setFormData(prev => ({ ...prev, contactEmail: e.target.value }))}
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">People interested in borrowing your supply will send messages to this email</p>
                 </div>
 
                 <div>

@@ -119,6 +119,7 @@ export type Database = {
         Row: {
           category: string
           condition: string
+          contact_email: string | null
           created_at: string
           date_available: string | null
           description: string
@@ -135,6 +136,7 @@ export type Database = {
         Insert: {
           category: string
           condition: string
+          contact_email?: string | null
           created_at?: string
           date_available?: string | null
           description: string
@@ -151,6 +153,7 @@ export type Database = {
         Update: {
           category?: string
           condition?: string
+          contact_email?: string | null
           created_at?: string
           date_available?: string | null
           description?: string

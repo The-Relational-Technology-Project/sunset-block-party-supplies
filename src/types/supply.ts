@@ -7,6 +7,7 @@ export interface Supply {
   partyTypes: string[];
   dateAvailable: string;
   location?: string;
+  contactEmail?: string;
   image?: string;
   houseRules?: string[];
   owner: {
