@@ -13,7 +13,7 @@ interface JoinRequest {
   email: string;
   intro: string;
   connection_context: string | null;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'rejected' | 'vouched';
   requested_at: string;
   voucher_id: string | null;
 }
@@ -44,35 +44,10 @@ export function JoinRequestsManager() {
   };
 
   const handleApprove = async (request: JoinRequest) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      // Update the join request status to 'approved'
-      const { error: requestError } = await supabase
-        .from('join_requests')
-        .update({
-          status: 'approved',
-          reviewed_by: user.id,
-          reviewed_at: new Date().toISOString()
-        })
-        .eq('id', request.id);
-
-      if (requestError) throw requestError;
-
-      toast({
-        title: "Application approved!",
-        description: `${request.name}'s application has been approved. They can now access the community.`
-      });
-
-      fetchRequests();
-    } catch (error: any) {
-      toast({
-        title: "Error approving request",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
+    toast({
+      title: "Simplified Process",
+      description: "Since you know everyone personally, just ask them to sign up again with their email. No approval needed!"
+    });
   };
 
   const handleReject = async (request: JoinRequest) => {
@@ -139,16 +114,15 @@ export function JoinRequestsManager() {
             <TableCell className="font-medium">{request.name}</TableCell>
             <TableCell>{request.email}</TableCell>
             <TableCell>
-              <Badge 
-                variant={
-                  request.status === 'approved' ? 'default' : 
+                <Badge 
+                 variant={
                   request.status === 'rejected' ? 'destructive' : 
-                  'secondary'
+                  request.status === 'vouched' ? 'default' : 'secondary'
                 }
               >
                 {request.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
-                {request.status === 'approved' && <CheckCircle className="h-3 w-3 mr-1" />}
                 {request.status === 'rejected' && <XCircle className="h-3 w-3 mr-1" />}
+                {request.status === 'vouched' && <CheckCircle className="h-3 w-3 mr-1" />}
                 {request.status}
               </Badge>
             </TableCell>
@@ -161,10 +135,10 @@ export function JoinRequestsManager() {
                   <Button 
                     size="sm" 
                     onClick={() => handleApprove(request)}
-                    className="bg-green-600 hover:bg-green-700"
+                    variant="outline"
                   >
-                    <CheckCircle className="h-4 w-4 mr-1" />
-                    Approve
+                    <Heart className="h-4 w-4 mr-1" />
+                    Ask to Sign Up
                   </Button>
                   <Button 
                     size="sm" 

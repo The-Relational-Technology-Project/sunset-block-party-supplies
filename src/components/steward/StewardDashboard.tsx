@@ -6,6 +6,7 @@ import { Shield, Users, Heart, UserCheck, Settings } from "lucide-react";
 import { JoinRequestsManager } from "./JoinRequestsManager";
 import { CommunityOverview } from "./CommunityOverview";
 import { BulkCreateUsers } from "./BulkCreateUsers";
+import { VouchedUsersExport } from "./VouchedUsersExport";
 
 export function StewardDashboard() {
   return (
@@ -18,8 +19,12 @@ export function StewardDashboard() {
         </div>
       </div>
 
-      <Tabs defaultValue="requests" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="vouched-users" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="vouched-users" className="flex items-center gap-2">
+            <UserCheck className="h-4 w-4" />
+            Vouched Users
+          </TabsTrigger>
           <TabsTrigger value="requests" className="flex items-center gap-2">
             <Heart className="h-4 w-4" />
             Join Requests
@@ -33,6 +38,10 @@ export function StewardDashboard() {
             Bulk Create Users
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="vouched-users">
+          <VouchedUsersExport />
+        </TabsContent>
 
         <TabsContent value="requests">
           <Card>
