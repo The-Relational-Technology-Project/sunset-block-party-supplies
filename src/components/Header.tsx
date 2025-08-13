@@ -36,19 +36,24 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
 
     checkUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const currentUser = session?.user || null;
       console.log("Header: Auth state changed:", event, currentUser);
       setUser(currentUser);
       
       if (currentUser) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', currentUser.id)
-          .single();
-        console.log("Header: Updated profile:", profile);
-        setUserProfile(profile);
+        // Defer Supabase calls with setTimeout to prevent deadlocks
+        setTimeout(() => {
+          supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', currentUser.id)
+            .single()
+            .then(({ data: profile }) => {
+              console.log("Header: Updated profile:", profile);
+              setUserProfile(profile);
+            });
+        }, 0);
       } else {
         setUserProfile(null);
       }
