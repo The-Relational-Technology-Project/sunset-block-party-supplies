@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,6 +11,8 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { HouseRules } from "@/components/HouseRules";
 import { ImageUpload } from "@/components/ImageUpload";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export function AddSupply() {
   const [formData, setFormData] = useState({
