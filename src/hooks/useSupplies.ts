@@ -32,6 +32,9 @@ export function useSupplies() {
         condition: item.condition as 'excellent' | 'good' | 'fair',
         partyTypes: item.party_types || [],
         dateAvailable: item.date_available || new Date().toISOString().split('T')[0],
+        location: item.location,
+        image: item.image_url,
+        houseRules: item.house_rules || [],
         owner: {
           name: item.profiles?.name || 'Unknown',
           zipCode: item.profiles?.zip_code || '00000',

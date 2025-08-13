@@ -23,8 +23,16 @@ export function SupplyCard({ supply, onViewContact }: SupplyCardProps) {
   return (
     <Card className="h-full hover:shadow-lg transition-shadow">
       <CardContent className="p-0">
-        <div className="aspect-video bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center">
-          <div className="text-6xl text-orange-300">📷</div>
+        <div className="aspect-video bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center overflow-hidden">
+          {supply.image ? (
+            <img 
+              src={supply.image} 
+              alt={supply.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="text-6xl text-orange-300">📷</div>
+          )}
         </div>
         
         <div className="p-4">
@@ -66,7 +74,7 @@ export function SupplyCard({ supply, onViewContact }: SupplyCardProps) {
                 <div className="text-sm font-medium">{supply.owner.name}</div>
                 <div className="text-xs text-gray-500 flex items-center">
                   <MapPin className="h-3 w-3 mr-1" />
-                  {supply.owner.location}
+                  {supply.location || `${supply.owner.zipCode} area`}
                 </div>
               </div>
             </div>

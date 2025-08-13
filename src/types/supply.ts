@@ -6,14 +6,15 @@ export interface Supply {
   condition: 'excellent' | 'good' | 'fair';
   partyTypes: string[];
   dateAvailable: string;
+  location?: string;
+  image?: string;
+  houseRules?: string[];
   owner: {
     name: string;
     zipCode: string;
     location: string;
     avatar: string;
   };
-  image?: string;
-  houseRules?: string[];
 }
 
 export interface PartyPlan {
