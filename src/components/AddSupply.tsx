@@ -12,9 +12,11 @@ import { toast } from "sonner";
 import { HouseRules } from "@/components/HouseRules";
 import { ImageUpload } from "@/components/ImageUpload";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 export function AddSupply() {
+  const [user, setUser] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -28,6 +30,14 @@ export function AddSupply() {
 
   const [houseRules, setHouseRules] = useState<string[]>([]);
 
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, []);
+
   const handlePartyTypeChange = (partyType: string, checked: boolean) => {
     setFormData(prev => ({
       ...prev,
@@ -37,28 +47,71 @@ export function AddSupply() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!formData.name || !formData.description || !formData.category || !formData.condition) {
       toast.error("Please fill in all required fields");
       return;
     }
+
+    if (!user) {
+      toast.error("You must be logged in to add supplies");
+      return;
+    }
+
+    setIsLoading(true);
     
-    console.log("Form submitted with:", { ...formData, houseRules });
-    toast.success("Supply added successfully! Thanks for sharing with the community!");
-    
-    // Reset form
-    setFormData({
-      name: "",
-      description: "",
-      category: "",
-      condition: "",
-      zipCode: "",
-      location: "",
-      partyTypes: [],
-      image: null,
-    });
-    setHouseRules([]);
+    try {
+      const { data, error } = await supabase
+        .from('supplies')
+        .insert([
+          {
+            name: formData.name,
+            description: formData.description,
+            category: formData.category,
+            condition: formData.condition || 'good',
+            party_types: formData.partyTypes,
+            zip_code: formData.zipCode,
+            location: formData.location,
+            image_url: formData.image,
+            house_rules: houseRules,
+            owner_id: user.id
+          }
+        ])
+        .select();
+
+      if (error) {
+        console.error('Error adding supply:', error);
+        if (error.message.includes('vouched')) {
+          toast.error("You must be vouched by a steward before you can add supplies");
+        } else {
+          toast.error("Error adding supply: " + error.message);
+        }
+        return;
+      }
+
+      toast.success("Supply added successfully! Thanks for sharing with the community!");
+      
+      // Reset form
+      setFormData({
+        name: "",
+        description: "",
+        category: "",
+        condition: "",
+        zipCode: "",
+        location: "",
+        partyTypes: [],
+        image: null,
+      });
+      setHouseRules([]);
+      
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -189,8 +242,12 @@ export function AddSupply() {
                 />
               </div>
 
-              <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-lg py-3">
-                Share My Supply
+              <Button 
+                type="submit" 
+                disabled={isLoading}
+                className="w-full bg-orange-500 hover:bg-orange-600 text-lg py-3"
+              >
+                {isLoading ? "Adding Supply..." : "Share My Supply"}
               </Button>
             </form>
           </CardContent>

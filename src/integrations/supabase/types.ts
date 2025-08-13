@@ -122,11 +122,15 @@ export type Database = {
           created_at: string
           date_available: string | null
           description: string
+          house_rules: string[] | null
           id: string
+          image_url: string | null
+          location: string | null
           name: string
           owner_id: string
           party_types: string[] | null
           updated_at: string
+          zip_code: string | null
         }
         Insert: {
           category: string
@@ -134,11 +138,15 @@ export type Database = {
           created_at?: string
           date_available?: string | null
           description: string
+          house_rules?: string[] | null
           id?: string
+          image_url?: string | null
+          location?: string | null
           name: string
           owner_id: string
           party_types?: string[] | null
           updated_at?: string
+          zip_code?: string | null
         }
         Update: {
           category?: string
@@ -146,11 +154,15 @@ export type Database = {
           created_at?: string
           date_available?: string | null
           description?: string
+          house_rules?: string[] | null
           id?: string
+          image_url?: string | null
+          location?: string | null
           name?: string
           owner_id?: string
           party_types?: string[] | null
           updated_at?: string
+          zip_code?: string | null
         }
         Relationships: [
           {
