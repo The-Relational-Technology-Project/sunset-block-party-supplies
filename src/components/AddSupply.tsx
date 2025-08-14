@@ -25,7 +25,7 @@ export function AddSupply() {
     name: "",
     description: "",
     category: "",
-    condition: "",
+    condition: "good", // Default to "good" to match placeholder
     zipCode: "",
     location: "",
     contactEmail: "",
@@ -134,7 +134,7 @@ export function AddSupply() {
         name: "",
         description: "",
         category: "",
-        condition: "",
+        condition: "good", // Reset to default "good"
         zipCode: userProfile?.zip_code || "",
         location: "",
         contactEmail: userProfile?.email || user?.email || "",
@@ -223,7 +223,7 @@ export function AddSupply() {
                     <Label htmlFor="condition">Condition</Label>
                     <Select value={formData.condition} onValueChange={(value) => setFormData(prev => ({ ...prev, condition: value }))}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Good" />
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="excellent">Excellent</SelectItem>
