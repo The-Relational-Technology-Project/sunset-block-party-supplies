@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,6 +15,7 @@ import { MultipleImageUpload } from "@/components/MultipleImageUpload";
 import { supabase } from "@/integrations/supabase/client";
 
 export function AddSupply() {
+  const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -127,19 +129,25 @@ export function AddSupply() {
 
       toast.success("Supply added successfully! Thanks for sharing with the community!");
       
-      // Reset form
+      // Reset form completely
       setFormData({
         name: "",
         description: "",
         category: "",
         condition: "",
-        zipCode: "",
+        zipCode: userProfile?.zip_code || "",
         location: "",
         contactEmail: userProfile?.email || user?.email || "",
         partyTypes: [],
         images: [],
       });
       setHouseRules([]);
+      setCustomPartyType("");
+      
+      // Navigate back to home after a brief delay to show the success message
+      setTimeout(() => {
+        navigate('/');
+      }, 1500);
       
     } catch (error) {
       console.error('Error:', error);

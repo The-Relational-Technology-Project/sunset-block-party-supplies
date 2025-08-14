@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
@@ -16,6 +16,11 @@ export function MultipleImageUpload({
 }: MultipleImageUploadProps) {
   const [images, setImages] = useState<string[]>(currentImages);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Update local state when currentImages prop changes (for form resets)
+  useEffect(() => {
+    setImages(currentImages);
+  }, [currentImages]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
