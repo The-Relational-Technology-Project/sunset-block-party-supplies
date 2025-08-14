@@ -23,15 +23,26 @@ export function SupplyCard({ supply, onViewContact }: SupplyCardProps) {
   return (
     <Card className="h-full hover:shadow-lg transition-shadow">
       <CardContent className="p-0">
-        <div className="aspect-video bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center overflow-hidden">
-          {supply.image ? (
+        <div className="relative aspect-video bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center overflow-hidden">
+          {supply.images && supply.images.length > 0 ? (
+            <img 
+              src={supply.images[0]} 
+              alt={supply.name}
+              className="w-full h-full object-contain"
+            />
+          ) : supply.image ? (
             <img 
               src={supply.image} 
               alt={supply.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           ) : (
             <div className="text-6xl text-orange-300">📷</div>
+          )}
+          {supply.images && supply.images.length > 1 && (
+            <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+              +{supply.images.length - 1} more
+            </div>
           )}
         </div>
         

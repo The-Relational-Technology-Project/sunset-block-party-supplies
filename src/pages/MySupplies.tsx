@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Supply } from "@/types/supply";
 import { Edit2, Save, X, Trash2, ArrowLeft } from "lucide-react";
 import { Header } from "@/components/Header";
+import { MultipleImageUpload } from "@/components/MultipleImageUpload";
 
 export default function MySupplies() {
   const navigate = useNavigate();
@@ -50,6 +51,7 @@ export default function MySupplies() {
         location: item.location,
         contactEmail: item.contact_email,
         image: item.image_url,
+        images: item.images || (item.image_url ? [item.image_url] : []),
         houseRules: item.house_rules || [],
         owner: {
           name: item.profiles?.name || 'Unknown',
@@ -95,6 +97,8 @@ export default function MySupplies() {
           date_available: editForm.dateAvailable,
           location: editForm.location,
           contact_email: editForm.contactEmail,
+          images: editForm.images,
+          image_url: editForm.images && editForm.images.length > 0 ? editForm.images[0] : null,
           house_rules: editForm.houseRules,
         })
         .eq('id', editingId);
@@ -192,12 +196,24 @@ export default function MySupplies() {
             {supplies.map((supply) => (
               <Card key={supply.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
-                  {supply.image && (
+                  {supply.images && supply.images.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                      {supply.images.slice(0, 4).map((image, index) => (
+                        <div key={index} className="aspect-square bg-gradient-to-br from-orange-100 to-orange-200 rounded-lg overflow-hidden">
+                          <img 
+                            src={image} 
+                            alt={`${supply.name} ${index + 1}`}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : supply.image && (
                     <div className="aspect-video bg-gradient-to-br from-orange-100 to-orange-200 rounded-lg overflow-hidden mb-4">
                       <img 
                         src={supply.image} 
                         alt={supply.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain"
                       />
                     </div>
                   )}
@@ -239,6 +255,11 @@ export default function MySupplies() {
                 <CardContent>
                   {editingId === supply.id ? (
                     <div className="space-y-4">
+                      <MultipleImageUpload 
+                        onImagesChange={(images) => setEditForm({ ...editForm, images })}
+                        currentImages={editForm.images || []}
+                        maxImages={4}
+                      />
                       <Textarea
                         value={editForm.description || ''}
                         onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}

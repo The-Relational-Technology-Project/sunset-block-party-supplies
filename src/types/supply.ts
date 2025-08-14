@@ -8,7 +8,8 @@ export interface Supply {
   dateAvailable: string;
   location?: string;
   contactEmail?: string;
-  image?: string;
+  image?: string; // Keep for backward compatibility
+  images?: string[]; // New multiple images support
   houseRules?: string[];
   owner: {
     name: string;

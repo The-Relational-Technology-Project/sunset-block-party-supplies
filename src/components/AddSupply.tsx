@@ -10,12 +10,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { HouseRules } from "@/components/HouseRules";
-import { ImageUpload } from "@/components/ImageUpload";
+import { MultipleImageUpload } from "@/components/MultipleImageUpload";
 import { supabase } from "@/integrations/supabase/client";
 
 export function AddSupply() {
   const [user, setUser] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [customPartyType, setCustomPartyType] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -26,17 +28,36 @@ export function AddSupply() {
     location: "",
     contactEmail: "",
     partyTypes: [] as string[],
-    image: null as string | null,
+    images: [] as string[],
   });
 
   const [houseRules, setHouseRules] = useState<string[]>([]);
 
   useEffect(() => {
-    const getUser = async () => {
+    const getUserAndProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
+      
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile) {
+          setUserProfile(profile);
+          // Auto-populate form with profile data
+          setFormData(prev => ({
+            ...prev,
+            contactEmail: profile.email || user.email || "",
+            zipCode: profile.zip_code || "",
+            // You could add logic here to extract location from profile if stored
+          }));
+        }
+      }
     };
-    getUser();
+    getUserAndProfile();
   }, []);
 
   const handlePartyTypeChange = (partyType: string, checked: boolean) => {
@@ -46,6 +67,16 @@ export function AddSupply() {
         ? [...prev.partyTypes, partyType]
         : prev.partyTypes.filter(type => type !== partyType)
     }));
+  };
+
+  const handleAddCustomPartyType = () => {
+    if (customPartyType.trim() && !formData.partyTypes.includes(customPartyType.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        partyTypes: [...prev.partyTypes, customPartyType.trim()]
+      }));
+      setCustomPartyType("");
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,7 +107,8 @@ export function AddSupply() {
             zip_code: formData.zipCode,
             location: formData.location,
             contact_email: formData.contactEmail,
-            image_url: formData.image,
+            images: formData.images,
+            image_url: formData.images[0] || null, // Keep first image for backward compatibility
             house_rules: houseRules,
             owner_id: user.id
           }
@@ -103,9 +135,9 @@ export function AddSupply() {
         condition: "",
         zipCode: "",
         location: "",
-        contactEmail: "",
+        contactEmail: userProfile?.email || user?.email || "",
         partyTypes: [],
-        image: null,
+        images: [],
       });
       setHouseRules([]);
       
@@ -155,9 +187,10 @@ export function AddSupply() {
                   />
                 </div>
 
-                <ImageUpload 
-                  onImageChange={(imageUrl) => setFormData(prev => ({ ...prev, image: imageUrl }))}
-                  currentImage={formData.image}
+                <MultipleImageUpload 
+                  onImagesChange={(images) => setFormData(prev => ({ ...prev, images }))}
+                  currentImages={formData.images}
+                  maxImages={4}
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -250,6 +283,56 @@ export function AddSupply() {
                       </div>
                     ))}
                   </div>
+                  
+                  {/* Custom party type input */}
+                  <div className="mt-4 space-y-2">
+                    <Label htmlFor="customPartyType">Add Other Party Type</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="customPartyType"
+                        placeholder="e.g., Baby Shower, Wedding Reception"
+                        value={customPartyType}
+                        onChange={(e) => setCustomPartyType(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddCustomPartyType();
+                          }
+                        }}
+                      />
+                      <Button 
+                        type="button" 
+                        onClick={handleAddCustomPartyType}
+                        variant="outline"
+                        disabled={!customPartyType.trim()}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Display selected custom party types */}
+                  {formData.partyTypes.some(type => !['Birthday Party', 'Block Party', 'Graduation Party', 'Holiday Party'].includes(type)) && (
+                    <div className="mt-2">
+                      <Label className="text-sm text-gray-600">Selected custom types:</Label>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {formData.partyTypes
+                          .filter(type => !['Birthday Party', 'Block Party', 'Graduation Party', 'Holiday Party'].includes(type))
+                          .map((type) => (
+                          <Button
+                            key={type}
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePartyTypeChange(type, false)}
+                            className="text-xs h-6"
+                          >
+                            {type} ×
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <HouseRules 

@@ -17,7 +17,8 @@ export function useSupplies() {
           *,
           profiles:owner_id (
             name,
-            zip_code
+            zip_code,
+            email
           )
         `)
         .order('created_at', { ascending: false });
@@ -35,6 +36,7 @@ export function useSupplies() {
         location: item.location,
         contactEmail: item.contact_email,
         image: item.image_url,
+        images: item.images || (item.image_url ? [item.image_url] : []),
         houseRules: item.house_rules || [],
         owner: {
           name: item.profiles?.name || 'Unknown',
