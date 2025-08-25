@@ -233,6 +233,13 @@ export type Database = {
           zip_code: string
         }[]
       }
+      get_supply_owner_info: {
+        Args: { owner_id_param: string }
+        Returns: {
+          name: string
+          zip_code: string
+        }[]
+      }
       is_user_steward: {
         Args: { user_id: string }
         Returns: boolean
