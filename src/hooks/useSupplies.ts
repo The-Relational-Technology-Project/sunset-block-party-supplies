@@ -17,8 +17,7 @@ export function useSupplies() {
           *,
           profiles:owner_id (
             name,
-            zip_code,
-            email
+            zip_code
           )
         `)
         .order('created_at', { ascending: false });
