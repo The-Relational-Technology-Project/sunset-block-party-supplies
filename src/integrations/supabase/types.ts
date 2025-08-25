@@ -180,6 +180,45 @@ export type Database = {
           },
         ]
       }
+      supply_requests: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          sender_contact: string
+          sender_name: string
+          status: string
+          supply_id: string
+          supply_name: string
+          supply_owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          sender_contact: string
+          sender_name: string
+          status?: string
+          supply_id: string
+          supply_name: string
+          supply_owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          sender_contact?: string
+          sender_name?: string
+          status?: string
+          supply_id?: string
+          supply_name?: string
+          supply_owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
