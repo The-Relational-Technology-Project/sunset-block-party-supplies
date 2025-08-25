@@ -81,11 +81,18 @@ export function SupplyCard({ supply, onViewContact }: SupplyCardProps) {
               <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-semibold">
                 {supply.owner.name.charAt(0)}
               </div>
-              <div>
-                <div className="text-sm font-medium">{supply.owner.name}</div>
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-medium">
+                  {supply.owner.name.split(' ')[0]}
+                </div>
                 <div className="text-xs text-gray-500 flex items-center">
-                  <MapPin className="h-3 w-3 mr-1" />
-                  {supply.location || `${supply.owner.zipCode} area`}
+                  <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+                  <span 
+                    className="truncate" 
+                    title={supply.location || `${supply.owner.zipCode} area`}
+                  >
+                    {supply.location || `${supply.owner.zipCode} area`}
+                  </span>
                 </div>
               </div>
             </div>
