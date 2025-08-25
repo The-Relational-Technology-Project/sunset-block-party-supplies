@@ -5,6 +5,7 @@ import { Gift, Users, Heart, Search, Plus, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthModal } from "./auth/AuthModal";
+import { Footer } from "./Footer";
 
 interface LandingPageProps {
   onTabChange: (tab: string) => void;
@@ -170,6 +171,7 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
         onClose={() => setModalMode(null)}
         mode={modalMode || 'login'}
       />
+      <Footer />
     </div>
   );
 }
