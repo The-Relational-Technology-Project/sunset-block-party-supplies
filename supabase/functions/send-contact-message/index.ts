@@ -1,7 +1,14 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+
+// Initialize Supabase client
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL") ?? "",
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,7 +17,9 @@ const corsHeaders = {
 };
 
 interface ContactRequest {
+  supplyId: string;
   supplyName: string;
+  supplyOwnerId: string;
   supplyOwnerEmail: string;
   senderName: string;
   senderContact: string;
@@ -24,9 +33,9 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { supplyName, supplyOwnerEmail, senderName, senderContact, message }: ContactRequest = await req.json();
+    const { supplyId, supplyName, supplyOwnerId, supplyOwnerEmail, senderName, senderContact, message }: ContactRequest = await req.json();
 
-    if (!supplyName || !supplyOwnerEmail || !senderName || !senderContact || !message) {
+    if (!supplyId || !supplyName || !supplyOwnerId || !supplyOwnerEmail || !senderName || !senderContact || !message) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         {
@@ -36,6 +45,29 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Store the supply request in the database
+    const { data: supplyRequest, error: dbError } = await supabase
+      .from('supply_requests')
+      .insert({
+        supply_id: supplyId,
+        supply_name: supplyName,
+        supply_owner_id: supplyOwnerId,
+        sender_name: senderName,
+        sender_contact: senderContact,
+        message: message,
+        status: 'pending'
+      })
+      .select()
+      .single();
+
+    if (dbError) {
+      console.error("Database error:", dbError);
+      throw new Error(`Failed to save supply request: ${dbError.message}`);
+    }
+
+    console.log("Supply request saved:", supplyRequest);
+
+    // Send email notification to supply owner
     const emailResponse = await resend.emails.send({
       from: "Party Supplies Community <onboarding@resend.dev>",
       to: [supplyOwnerEmail],
@@ -71,7 +103,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Contact email sent successfully:", emailResponse);
 
-    return new Response(JSON.stringify({ success: true, emailResponse }), {
+    return new Response(JSON.stringify({ 
+      success: true, 
+      emailResponse,
+      supplyRequest: supplyRequest
+    }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",

@@ -11,6 +11,7 @@ export interface Supply {
   image?: string; // Keep for backward compatibility
   images?: string[]; // New multiple images support
   houseRules?: string[];
+  ownerId?: string; // Add owner ID for database operations
   owner: {
     name: string;
     zipCode: string;

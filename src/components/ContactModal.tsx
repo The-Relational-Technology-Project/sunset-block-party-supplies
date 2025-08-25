@@ -38,7 +38,9 @@ export function ContactModal({ supply, isOpen, onClose }: ContactModalProps) {
     try {
       const response = await supabase.functions.invoke('send-contact-message', {
         body: {
+          supplyId: supply.id,
           supplyName: supply.name,
+          supplyOwnerId: supply.ownerId,
           supplyOwnerEmail: supply.contactEmail,
           senderName,
           senderContact,

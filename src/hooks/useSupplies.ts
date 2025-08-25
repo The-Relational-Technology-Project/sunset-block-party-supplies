@@ -37,6 +37,7 @@ export function useSupplies() {
         image: item.image_url,
         images: item.images || (item.image_url ? [item.image_url] : []),
         houseRules: item.house_rules || [],
+        ownerId: item.owner_id,
         owner: {
           name: item.profiles?.name || 'Unknown',
           zipCode: item.profiles?.zip_code || '00000',
