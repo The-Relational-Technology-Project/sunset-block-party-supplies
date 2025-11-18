@@ -1,11 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus } from "lucide-react";
@@ -13,6 +11,7 @@ import { toast } from "sonner";
 import { HouseRules } from "@/components/HouseRules";
 import { MultipleImageUpload } from "@/components/MultipleImageUpload";
 import { supabase } from "@/integrations/supabase/client";
+import { categories } from "@/data/categories";
 
 export function AddSupply() {
   const navigate = useNavigate();
@@ -25,7 +24,7 @@ export function AddSupply() {
     name: "",
     description: "",
     category: "",
-    condition: "good", // Default to "good" to match placeholder
+    condition: "good",
     zipCode: "",
     location: "",
     contactEmail: "",
@@ -49,12 +48,10 @@ export function AddSupply() {
         
         if (profile) {
           setUserProfile(profile);
-          // Auto-populate form with profile data
           setFormData(prev => ({
             ...prev,
             contactEmail: profile.email || user.email || "",
             zipCode: profile.zip_code || "",
-            // You could add logic here to extract location from profile if stored
           }));
         }
       }
@@ -110,31 +107,22 @@ export function AddSupply() {
             location: formData.location,
             contact_email: formData.contactEmail,
             images: formData.images,
-            image_url: formData.images[0] || null, // Keep first image for backward compatibility
+            image_url: formData.images[0] || null,
             house_rules: houseRules,
             owner_id: user.id
           }
         ])
         .select();
 
-      if (error) {
-        console.error('Error adding supply:', error);
-        if (error.message.includes('vouched')) {
-          toast.error("You must be vouched by a steward before you can add supplies");
-        } else {
-          toast.error("Error adding supply: " + error.message);
-        }
-        return;
-      }
+      if (error) throw error;
 
-      toast.success("Supply added successfully! Thanks for sharing with the community!");
+      toast.success("Item added successfully!");
       
-      // Reset form completely
       setFormData({
         name: "",
         description: "",
         category: "",
-        condition: "good", // Reset to default "good"
+        condition: "good",
         zipCode: userProfile?.zip_code || "",
         location: "",
         contactEmail: userProfile?.email || user?.email || "",
@@ -142,223 +130,222 @@ export function AddSupply() {
         images: [],
       });
       setHouseRules([]);
-      setCustomPartyType("");
       
-      // Navigate back to home after a brief delay to show the success message
-      setTimeout(() => {
-        navigate('/');
-      }, 1500);
-      
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error("Something went wrong. Please try again.");
+      navigate('/?tab=browse');
+    } catch (error: any) {
+      console.error('Error adding supply:', error);
+      toast.error(error.message || "Failed to add item. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
+  const partyTypeOptions = [
+    "Birthday",
+    "Baby Shower",
+    "Wedding",
+    "Holiday",
+    "BBQ",
+    "Sports",
+    "School Event",
+    "Other"
+  ];
+
   return (
-    <div className="min-h-screen bg-orange-50 py-4 md:py-8">
-      <div className="container mx-auto px-4 max-w-2xl">
-        <Card>
-          <CardHeader className="text-center">
-            <div className="mx-auto w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mb-4">
-              <Plus className="h-8 w-8 text-white" />
-            </div>
-            <CardTitle className="text-xl md:text-2xl">Share Your Supplies</CardTitle>
-            <p className="text-gray-600 text-sm md:text-base">Help families in the Outer Sunset create amazing birthday parties!</p>
-          </CardHeader>
-          
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Supply Name *</Label>
-                  <Input
-                    id="name"
-                    placeholder="e.g., Beach Ball Birthday Decorations"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    required
-                  />
-                </div>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-6 py-8 max-w-4xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-serif font-semibold text-deep-brown mb-2">
+            Add an Item
+          </h1>
+          <p className="text-muted-foreground">
+            Share an item with your neighbors
+          </p>
+        </div>
 
-                <div>
-                  <Label htmlFor="description">Description *</Label>
-                  <Textarea
-                    id="description"
-                    placeholder="Describe what's included, condition, and any special details..."
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    rows={4}
-                    required
-                  />
-                </div>
-
-                <MultipleImageUpload 
-                  onImagesChange={(images) => setFormData(prev => ({ ...prev, images }))}
-                  currentImages={formData.images}
-                  maxImages={4}
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="category">Category *</Label>
-                    <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="decorations">Decorations</SelectItem>
-                        <SelectItem value="inflatables">Inflatables</SelectItem>
-                        <SelectItem value="costumes">Costumes & Dress-up</SelectItem>
-                        <SelectItem value="games">Games & Activities</SelectItem>
-                        <SelectItem value="tableware">Tableware</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="condition">Condition</Label>
-                    <Select value={formData.condition} onValueChange={(value) => setFormData(prev => ({ ...prev, condition: value }))}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="excellent">Excellent</SelectItem>
-                        <SelectItem value="good">Good</SelectItem>
-                        <SelectItem value="fair">Fair</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="zipCode">ZIP Code (e.g., 94122)</Label>
-                    <Input
-                      id="zipCode"
-                      placeholder="e.g., 94122"
-                      value={formData.zipCode}
-                      onChange={(e) => setFormData(prev => ({ ...prev, zipCode: e.target.value }))}
-                      maxLength={5}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="location">Location (Cross Streets or Landmark)</Label>
-                    <Input
-                      id="location"
-                      placeholder="e.g., 46th Ave & Judah St"
-                      value={formData.location}
-                      onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="contactEmail">Contact Email *</Label>
-                  <Input
-                    id="contactEmail"
-                    type="email"
-                    placeholder="Best email to reach you about this supply"
-                    value={formData.contactEmail}
-                    onChange={(e) => setFormData(prev => ({ ...prev, contactEmail: e.target.value }))}
-                    required
-                  />
-                  <p className="text-xs text-gray-500 mt-1">People interested in borrowing your supply will send messages to this email</p>
-                </div>
-
-                <div>
-                  <Label>Party Types (Select all that apply)</Label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-                    {[
-                      'Birthday Party',
-                      'Block Party', 
-                      'Graduation Party',
-                      'Holiday Party'
-                    ].map((partyType) => (
-                      <div key={partyType} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={partyType}
-                          checked={formData.partyTypes.includes(partyType)}
-                          onCheckedChange={(checked) => handlePartyTypeChange(partyType, checked as boolean)}
-                        />
-                        <Label htmlFor={partyType} className="text-sm font-normal">
-                          {partyType}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {/* Custom party type input */}
-                  <div className="mt-4 space-y-2">
-                    <Label htmlFor="customPartyType">Add Other Party Type</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="customPartyType"
-                        placeholder="e.g., Baby Shower, Wedding Reception"
-                        value={customPartyType}
-                        onChange={(e) => setCustomPartyType(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleAddCustomPartyType();
-                          }
-                        }}
-                      />
-                      <Button 
-                        type="button" 
-                        onClick={handleAddCustomPartyType}
-                        variant="outline"
-                        disabled={!customPartyType.trim()}
-                      >
-                        Add
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Display selected custom party types */}
-                  {formData.partyTypes.some(type => !['Birthday Party', 'Block Party', 'Graduation Party', 'Holiday Party'].includes(type)) && (
-                    <div className="mt-2">
-                      <Label className="text-sm text-gray-600">Selected custom types:</Label>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {formData.partyTypes
-                          .filter(type => !['Birthday Party', 'Block Party', 'Graduation Party', 'Holiday Party'].includes(type))
-                          .map((type) => (
-                          <Button
-                            key={type}
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handlePartyTypeChange(type, false)}
-                            className="text-xs h-6"
-                          >
-                            {type} ×
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <HouseRules 
-                  rules={houseRules}
-                  onRulesChange={setHouseRules}
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="bg-card border border-border rounded-sm p-6 space-y-6">
+            <h2 className="text-lg font-serif font-semibold text-deep-brown">Basic Information</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
+                <Label htmlFor="name" className="text-deep-brown font-medium">
+                  Item Name *
+                </Label>
+                <Input
+                  id="name"
+                  placeholder="e.g., Folding Tables (2)"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  className="border-border mt-1"
+                  required
                 />
               </div>
 
-              <Button 
-                type="submit" 
-                disabled={isLoading}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-lg py-3"
+              <div className="md:col-span-2">
+                <Label htmlFor="description" className="text-deep-brown font-medium">
+                  Description *
+                </Label>
+                <Textarea
+                  id="description"
+                  placeholder="Describe the item, its condition, and any important details..."
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  className="border-border mt-1 min-h-[100px]"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="category" className="text-deep-brown font-medium">
+                  Category *
+                </Label>
+                <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
+                  <SelectTrigger className="border-border mt-1">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.filter(c => c.id !== 'all').map(category => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="condition" className="text-deep-brown font-medium">
+                  Condition *
+                </Label>
+                <Select value={formData.condition} onValueChange={(value) => setFormData(prev => ({ ...prev, condition: value }))}>
+                  <SelectTrigger className="border-border mt-1">
+                    <SelectValue placeholder="Select condition" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="excellent">Excellent</SelectItem>
+                    <SelectItem value="good">Good</SelectItem>
+                    <SelectItem value="fair">Fair</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-sm p-6 space-y-4">
+            <h2 className="text-lg font-serif font-semibold text-deep-brown">Photos</h2>
+            <p className="text-sm text-muted-foreground">Add photos to help others see what you're sharing</p>
+            <MultipleImageUpload
+              currentImages={formData.images}
+              onImagesChange={(images) => setFormData(prev => ({ ...prev, images }))}
+            />
+          </div>
+
+          <div className="bg-card border border-border rounded-sm p-6 space-y-6">
+            <h2 className="text-lg font-serif font-semibold text-deep-brown">Location & Contact</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="zipCode" className="text-deep-brown font-medium">
+                  ZIP Code
+                </Label>
+                <Input
+                  id="zipCode"
+                  placeholder="94122"
+                  value={formData.zipCode}
+                  onChange={(e) => setFormData(prev => ({ ...prev, zipCode: e.target.value }))}
+                  className="border-border mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="location" className="text-deep-brown font-medium">
+                  Neighborhood / Intersection
+                </Label>
+                <Input
+                  id="location"
+                  placeholder="e.g., 46th & Judah"
+                  value={formData.location}
+                  onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                  className="border-border mt-1"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <Label htmlFor="contactEmail" className="text-deep-brown font-medium">
+                  Contact Email *
+                </Label>
+                <Input
+                  id="contactEmail"
+                  type="email"
+                  placeholder="your-email@example.com"
+                  value={formData.contactEmail}
+                  onChange={(e) => setFormData(prev => ({ ...prev, contactEmail: e.target.value }))}
+                  className="border-border mt-1"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-sm p-6 space-y-4">
+            <h2 className="text-lg font-serif font-semibold text-deep-brown">Suitable For (Optional)</h2>
+            <p className="text-sm text-muted-foreground">What types of events or occasions is this item good for?</p>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {partyTypeOptions.map((type) => (
+                <label key={type} className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox
+                    checked={formData.partyTypes.includes(type)}
+                    onCheckedChange={(checked) => handlePartyTypeChange(type, checked as boolean)}
+                  />
+                  <span className="text-sm text-foreground">{type}</span>
+                </label>
+              ))}
+            </div>
+
+            <div className="flex gap-2">
+              <Input
+                placeholder="Add custom type..."
+                value={customPartyType}
+                onChange={(e) => setCustomPartyType(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomPartyType())}
+                className="border-border"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleAddCustomPartyType}
+                className="shrink-0"
               >
-                {isLoading ? "Adding Supply..." : "Share My Supply"}
+                <Plus className="h-4 w-4" />
               </Button>
-            </form>
-          </CardContent>
-        </Card>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-sm p-6 space-y-4">
+            <h2 className="text-lg font-serif font-semibold text-deep-brown">Borrowing Guidelines (Optional)</h2>
+            <p className="text-sm text-muted-foreground">Set any rules or expectations for borrowing this item</p>
+            <HouseRules rules={houseRules} onRulesChange={setHouseRules} />
+          </div>
+
+          <div className="flex gap-4">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="flex-1"
+            >
+              {isLoading ? "Adding Item..." : "Add Item"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate('/')}
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
       </div>
     </div>
   );

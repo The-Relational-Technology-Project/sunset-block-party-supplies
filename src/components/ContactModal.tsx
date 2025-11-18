@@ -8,6 +8,7 @@ import { Supply } from "@/types/supply";
 import { MapPin, Calendar, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Label } from "@/components/ui/label";
 
 interface ContactModalProps {
   supply: Supply | null;
@@ -55,7 +56,6 @@ export function ContactModal({ supply, isOpen, onClose }: ContactModalProps) {
         description: `Your message has been sent to ${supply.owner.name}`,
       });
 
-      // Reset form and close modal
       setSenderName("");
       setSenderContact("");
       setMessage("");
@@ -75,139 +75,142 @@ export function ContactModal({ supply, isOpen, onClose }: ContactModalProps) {
 
   const getConditionColor = (condition: string) => {
     switch (condition) {
-      case 'excellent': return 'bg-green-100 text-green-800';
-      case 'good': return 'bg-yellow-100 text-yellow-800';
-      case 'fair': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'excellent': return 'bg-peach/20 text-deep-brown border-peach';
+      case 'good': return 'bg-sand/50 text-deep-brown border-sand';
+      case 'fair': return 'bg-terracotta/20 text-deep-brown border-terracotta';
+      default: return 'bg-muted text-muted-foreground border-border';
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-card border-border">
         <DialogHeader>
-          <DialogTitle className="text-xl">Contact about: {supply.name}</DialogTitle>
+          <DialogTitle className="text-2xl font-serif text-deep-brown">{supply.name}</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6">
-          {/* Supply Image */}
-          <div className="aspect-video bg-gradient-to-br from-orange-100 to-orange-200 rounded-lg flex items-center justify-center overflow-hidden">
-            {supply.image ? (
-              <img 
-                src={supply.image} 
-                alt={supply.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="text-8xl text-orange-300">📷</div>
-            )}
-          </div>
-          
-          {/* Supply Details */}
+        <div className="grid md:grid-cols-2 gap-6">
           <div className="space-y-4">
-            <div className="flex gap-2">
-              <Badge className={getConditionColor(supply.condition)}>
-                {supply.condition}
-              </Badge>
-              <Badge variant="secondary">available</Badge>
+            <div className="aspect-square bg-sand/30 rounded-sm flex items-center justify-center overflow-hidden border border-border">
+              {supply.image ? (
+                <img 
+                  src={supply.image} 
+                  alt={supply.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="text-6xl text-sand">📦</div>
+              )}
             </div>
             
-            <p className="text-gray-700">{supply.description}</p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <div className="flex gap-2 flex-wrap">
+                <Badge className={`${getConditionColor(supply.condition)} border`}>
+                  {supply.condition}
+                </Badge>
+                <Badge variant="secondary" className="bg-muted text-muted-foreground">
+                  {supply.category}
+                </Badge>
+              </div>
+              
               <div>
-                <h4 className="font-semibold mb-2">Details</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                    Available: {supply.dateAvailable}
-                  </div>
-                  {supply.location && (
-                    <div className="flex items-center">
-                      <MapPin className="h-4 w-4 mr-2 text-gray-400" />
-                      {supply.location}
-                    </div>
-                  )}
+                <h3 className="text-sm font-medium text-deep-brown mb-1">Description</h3>
+                <p className="text-sm text-muted-foreground">{supply.description}</p>
+              </div>
+              
+              <div className="space-y-2 pt-2 border-t border-border">
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="h-4 w-4 text-terracotta" />
+                  <span className="text-muted-foreground">
+                    {supply.location || supply.owner.zipCode}
+                  </span>
                 </div>
                 
-                {supply.partyTypes.length > 0 && (
-                  <div className="mt-3">
-                    <h5 className="font-medium mb-1">Party Types:</h5>
-                    <div className="flex flex-wrap gap-1">
-                      {supply.partyTypes.map((type) => (
-                        <Badge key={type} variant="outline" className="text-xs">
-                          {type}
-                        </Badge>
-                      ))}
-                    </div>
+                {supply.dateAvailable && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Calendar className="h-4 w-4 text-terracotta" />
+                    <span className="text-muted-foreground">
+                      Available: {new Date(supply.dateAvailable).toLocaleDateString()}
+                    </span>
                   </div>
                 )}
               </div>
-              
-              <div>
-                <h4 className="font-semibold mb-2">Owner</h4>
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    {supply.owner.name.charAt(0)}
-                  </div>
-                  <div>
-                    <div className="font-medium">{supply.owner.name}</div>
-                    <div className="text-sm text-gray-500">{supply.owner.zipCode}</div>
-                  </div>
+
+              {supply.houseRules && supply.houseRules.length > 0 && (
+                <div className="pt-2 border-t border-border">
+                  <h3 className="text-sm font-medium text-deep-brown mb-2">Borrowing Guidelines</h3>
+                  <ul className="space-y-1">
+                    {supply.houseRules.map((rule, index) => (
+                      <li key={index} className="text-sm text-muted-foreground flex gap-2">
+                        <span className="text-terracotta">•</span>
+                        <span>{rule}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              </div>
+              )}
             </div>
           </div>
-          
-          {/* Contact Form */}
-          <div className="border-t pt-6">
-            <h4 className="font-semibold mb-4">Send a Message</h4>
+
+          <div className="space-y-4">
+            <div className="bg-sand/20 border border-sand rounded-sm p-4">
+              <h3 className="text-sm font-medium text-deep-brown mb-1">Owner</h3>
+              <p className="text-base text-deep-brown">{supply.owner.name}</p>
+              <p className="text-sm text-muted-foreground">{supply.owner.zipCode}</p>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Your Name *</label>
-                  <Input
-                    value={senderName}
-                    onChange={(e) => setSenderName(e.target.value)}
-                    placeholder="Enter your name"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Your Contact (Email or Phone) *</label>
-                  <Input
-                    value={senderContact}
-                    onChange={(e) => setSenderContact(e.target.value)}
-                    placeholder="your@email.com or (555) 123-4567"
-                    required
-                  />
-                </div>
-              </div>
-              
               <div>
-                <label className="block text-sm font-medium mb-1">Message *</label>
-                <Textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Hi! I'm interested in borrowing your supply for... When would be a good time to arrange pickup?"
-                  rows={4}
+                <Label htmlFor="senderName" className="text-deep-brown font-medium">
+                  Your Name *
+                </Label>
+                <Input
+                  id="senderName"
+                  placeholder="Enter your name"
+                  value={senderName}
+                  onChange={(e) => setSenderName(e.target.value)}
                   required
+                  className="border-border mt-1"
                 />
               </div>
-              
-              <Button 
-                type="submit" 
-                disabled={isLoading} 
-                className="w-full bg-orange-500 hover:bg-orange-600"
+
+              <div>
+                <Label htmlFor="senderContact" className="text-deep-brown font-medium">
+                  Your Email or Phone *
+                </Label>
+                <Input
+                  id="senderContact"
+                  placeholder="your-email@example.com"
+                  value={senderContact}
+                  onChange={(e) => setSenderContact(e.target.value)}
+                  required
+                  className="border-border mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="message" className="text-deep-brown font-medium">
+                  Message *
+                </Label>
+                <Textarea
+                  id="message"
+                  placeholder="Hi! I'd like to borrow your..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  required
+                  className="border-border mt-1 min-h-[120px]"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full"
               >
                 <Send className="h-4 w-4 mr-2" />
                 {isLoading ? "Sending..." : "Send Message"}
               </Button>
             </form>
-            
-            <p className="text-xs text-gray-500 mt-2">
-              Your message will be sent directly to {supply.owner.name}'s email. They'll be able to respond to arrange details about borrowing this supply.
-            </p>
           </div>
         </div>
       </DialogContent>

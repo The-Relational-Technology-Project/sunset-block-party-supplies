@@ -75,8 +75,6 @@ export function MultipleImageUpload({
 
   return (
     <div className="space-y-4">
-      <Label>Supply Images (optional, up to {maxImages})</Label>
-      
       {images.length > 0 && (
         <div className="grid grid-cols-2 gap-4">
           {images.map((image, index) => (
@@ -84,7 +82,7 @@ export function MultipleImageUpload({
               <img 
                 src={image} 
                 alt={`Supply image ${index + 1}`} 
-                className="w-full h-32 object-contain rounded-lg border-2 border-gray-200 bg-gray-50"
+                className="w-full h-32 object-contain rounded-sm border border-border bg-sand/10"
               />
               <Button
                 onClick={() => handleRemoveImage(index)}
@@ -103,13 +101,13 @@ export function MultipleImageUpload({
         <>
           <div 
             onClick={handleUploadClick}
-            className="w-full h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-orange-400 transition-colors"
+            className="w-full h-32 border-2 border-dashed border-border rounded-sm flex flex-col items-center justify-center cursor-pointer hover:border-terracotta transition-colors"
           >
-            <ImageIcon className="h-8 w-8 text-gray-400 mb-2" />
-            <p className="text-gray-500 text-center mb-1 text-sm">
+            <ImageIcon className="h-8 w-8 text-muted-foreground mb-2" />
+            <p className="text-muted-foreground text-center mb-1 text-sm">
               Click to upload images
             </p>
-            <p className="text-xs text-gray-400 text-center">
+            <p className="text-xs text-muted-foreground text-center">
               PNG, JPG up to 5MB each ({images.length}/{maxImages})
             </p>
           </div>
