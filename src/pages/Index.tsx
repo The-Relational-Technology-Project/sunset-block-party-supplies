@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Header } from "@/components/Header";
+import { CatalogHeader } from "@/components/CatalogHeader";
 import { Footer } from "@/components/Footer";
 import { LandingPage } from "@/components/LandingPage";
 import { BrowseSupplies } from "@/components/BrowseSupplies";
@@ -111,15 +111,15 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <main className="min-h-screen flex flex-col">
       <AuthGuard>
-        <Header activeTab={activeTab} onTabChange={setActiveTab} />
-        <main className="container mx-auto px-4 py-8 flex-1">
+        <CatalogHeader onNavigate={setActiveTab} />
+        <div className="flex-1">
           {renderContent()}
-        </main>
+        </div>
         <Footer />
       </AuthGuard>
-    </div>
+    </main>
   );
 };
 

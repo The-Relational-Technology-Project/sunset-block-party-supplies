@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,17 +12,17 @@ interface SupplyCardProps {
 export function SupplyCard({ supply, onViewContact }: SupplyCardProps) {
   const getConditionColor = (condition: string) => {
     switch (condition) {
-      case 'excellent': return 'bg-green-100 text-green-800';
-      case 'good': return 'bg-yellow-100 text-yellow-800';
-      case 'fair': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'excellent': return 'bg-green-50 text-green-700 border-green-200';
+      case 'good': return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+      case 'fair': return 'bg-orange-50 text-orange-700 border-orange-200';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
   return (
-    <Card className="h-full hover:shadow-lg transition-shadow">
+    <Card className="h-full hover:shadow-md transition-shadow border-border">
       <CardContent className="p-0">
-        <div className="relative aspect-video bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center overflow-hidden">
+        <div className="relative aspect-video bg-muted flex items-center justify-center overflow-hidden">
           {supply.images && supply.images.length > 0 ? (
             <img 
               src={supply.images[0]} 
@@ -37,10 +36,10 @@ export function SupplyCard({ supply, onViewContact }: SupplyCardProps) {
               className="w-full h-full object-contain"
             />
           ) : (
-            <div className="text-6xl text-orange-300">📷</div>
+            <div className="text-4xl text-muted-foreground">📦</div>
           )}
           {supply.images && supply.images.length > 1 && (
-            <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+            <div className="absolute bottom-2 right-2 bg-deep-brown/80 text-sand text-xs px-2 py-1 rounded-sm">
               +{supply.images.length - 1} more
             </div>
           )}
@@ -48,44 +47,41 @@ export function SupplyCard({ supply, onViewContact }: SupplyCardProps) {
         
         <div className="p-4">
           <div className="flex justify-between items-start mb-2">
-            <h3 className="font-semibold text-lg">{supply.name}</h3>
-            <div className="flex gap-1">
-              <Badge className={getConditionColor(supply.condition)}>
-                {supply.condition}
-              </Badge>
-              <Badge variant="secondary">available</Badge>
-            </div>
+            <h3 className="font-serif font-semibold text-base text-deep-brown">{supply.name}</h3>
+            <Badge className={`${getConditionColor(supply.condition)} text-xs border`}>
+              {supply.condition}
+            </Badge>
           </div>
           
-          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+          <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
             {supply.description}
           </p>
           
           <div className="space-y-2 mb-4">
-            <div className="flex items-center text-sm text-gray-500">
-              <Calendar className="h-4 w-4 mr-1" />
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Calendar className="h-3 w-3 mr-1" />
               {supply.dateAvailable}
             </div>
             
             <div className="flex flex-wrap gap-1">
               {supply.partyTypes.map((type) => (
-                <Badge key={type} variant="outline" className="text-xs">
+                <Badge key={type} variant="outline" className="text-xs border-border">
                   {type}
                 </Badge>
               ))}
             </div>
           </div>
           
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between pt-3 border-t border-border">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-semibold">
+              <div className="w-7 h-7 bg-terracotta rounded-full flex items-center justify-center text-white text-xs font-semibold">
                 {supply.owner.name.charAt(0)}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium">
+                <div className="text-sm font-medium text-deep-brown">
                   {supply.owner.name.split(' ')[0]}
                 </div>
-                <div className="text-xs text-gray-500 flex items-center">
+                <div className="text-xs text-muted-foreground flex items-center">
                   <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
                   <span 
                     className="truncate" 
@@ -99,9 +95,10 @@ export function SupplyCard({ supply, onViewContact }: SupplyCardProps) {
             
             <Button 
               onClick={() => onViewContact(supply)}
-              className="bg-orange-500 hover:bg-orange-600"
+              size="sm"
+              className="bg-terracotta hover:bg-terracotta/90 text-white"
             >
-              View & Contact
+              View
             </Button>
           </div>
         </div>

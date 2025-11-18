@@ -1,160 +1,120 @@
-
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { SupplyCard } from "./SupplyCard";
 import { ContactModal } from "./ContactModal";
 import { Supply } from "@/types/supply";
 import { useSupplies } from "@/hooks/useSupplies";
-import { Search, Grid, List, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { CategorySidebar } from "./CategorySidebar";
+import { categories } from "@/data/categories";
 
 export function BrowseSupplies() {
   const { supplies, loading } = useSupplies();
-  const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [conditionFilter, setConditionFilter] = useState("all");
-  const [partyTypeFilter, setPartyTypeFilter] = useState("all");
   const [zipCodeFilter, setZipCodeFilter] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedSupply, setSelectedSupply] = useState<Supply | null>(null);
 
   const filteredSupplies = useMemo(() => {
     return supplies.filter((supply) => {
-      const matchesSearch = supply.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           supply.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = categoryFilter === "all" || supply.category === categoryFilter;
       const matchesCondition = conditionFilter === "all" || supply.condition === conditionFilter;
-      const matchesPartyType = partyTypeFilter === "all" || 
-                              supply.partyTypes.some(type => type.toLowerCase().includes(partyTypeFilter.toLowerCase()));
       const matchesZip = !zipCodeFilter || supply.owner.zipCode.includes(zipCodeFilter);
 
-      return matchesSearch && matchesCategory && matchesCondition && matchesPartyType && matchesZip;
+      return matchesCategory && matchesCondition && matchesZip;
     });
-  }, [supplies, searchTerm, categoryFilter, conditionFilter, partyTypeFilter, zipCodeFilter]);
+  }, [supplies, categoryFilter, conditionFilter, zipCodeFilter]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-orange-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-orange-500" />
-          <p className="text-gray-600">Loading supplies...</p>
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-terracotta" />
+          <p className="text-muted-foreground">Loading supplies...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-orange-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search supplies..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="decorations">Decorations</SelectItem>
-                <SelectItem value="inflatables">Inflatables</SelectItem>
-                <SelectItem value="costumes">Costumes & Dress-up</SelectItem>
-                <SelectItem value="games">Games & Activities</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Select value={conditionFilter} onValueChange={setConditionFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Any Condition" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Any Condition</SelectItem>
-                <SelectItem value="excellent">Excellent</SelectItem>
-                <SelectItem value="good">Good</SelectItem>
-                <SelectItem value="fair">Fair</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Select value={partyTypeFilter} onValueChange={setPartyTypeFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Party Types" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Party Types</SelectItem>
-                <SelectItem value="birthday">Birthday Party</SelectItem>
-                <SelectItem value="block">Block Party</SelectItem>
-                <SelectItem value="graduation">Graduation Party</SelectItem>
-                <SelectItem value="holiday">Holiday Party</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Input
-              placeholder="ZIP Code"
-              value={zipCodeFilter}
-              onChange={(e) => setZipCodeFilter(e.target.value)}
-              maxLength={5}
-            />
+    <div className="min-h-screen bg-background flex">
+      <CategorySidebar 
+        selectedCategory={categoryFilter}
+        onCategoryChange={setCategoryFilter}
+      />
+      
+      <div className="flex-1 overflow-auto">
+        <div className="container mx-auto px-6 py-8">
+          {/* Page Title */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-serif font-semibold text-deep-brown mb-2">
+              {categoryFilter === "all" ? "All Items" : 
+               categories.find(c => c.id === categoryFilter)?.name || "Items"}
+            </h1>
+            <p className="text-muted-foreground">
+              {filteredSupplies.length} {filteredSupplies.length === 1 ? 'item' : 'items'} available
+            </p>
           </div>
-          
-          <div className="flex justify-between items-center">
-            <div className="flex gap-2">
-              <Button
-                variant={viewMode === "grid" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("grid")}
-              >
-                <Grid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === "list" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("list")}
-              >
-                <List className="h-4 w-4" />
-              </Button>
+
+          {/* Filters */}
+          <div className="bg-card border border-border rounded-sm p-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium text-deep-brown mb-2 block">
+                  Condition
+                </label>
+                <Select value={conditionFilter} onValueChange={setConditionFilter}>
+                  <SelectTrigger className="border-border">
+                    <SelectValue placeholder="Any Condition" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Any Condition</SelectItem>
+                    <SelectItem value="excellent">Excellent</SelectItem>
+                    <SelectItem value="good">Good</SelectItem>
+                    <SelectItem value="fair">Fair</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-deep-brown mb-2 block">
+                  ZIP Code
+                </label>
+                <Input
+                  placeholder="Filter by ZIP..."
+                  value={zipCodeFilter}
+                  onChange={(e) => setZipCodeFilter(e.target.value)}
+                  className="border-border"
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Results */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">
-            Available Supplies ({filteredSupplies.length} items)
-          </h2>
+          {/* Results Grid */}
+          {filteredSupplies.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-muted-foreground text-lg">
+                No supplies found matching your filters.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredSupplies.map((supply) => (
+                <SupplyCard
+                  key={supply.id}
+                  supply={supply}
+                  onViewContact={setSelectedSupply}
+                />
+              ))}
+            </div>
+          )}
         </div>
-
-        <div className={`grid gap-6 ${viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}`}>
-          {filteredSupplies.map((supply) => (
-            <SupplyCard
-              key={supply.id}
-              supply={supply}
-              onViewContact={setSelectedSupply}
-            />
-          ))}
-        </div>
-
-        {filteredSupplies.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-gray-600 mb-2">No supplies found</h3>
-            <p className="text-gray-500">Try adjusting your search criteria or check back later for new listings!</p>
-          </div>
-        )}
       </div>
 
       <ContactModal
-        supply={selectedSupply}
         isOpen={!!selectedSupply}
+        supply={selectedSupply}
         onClose={() => setSelectedSupply(null)}
       />
     </div>

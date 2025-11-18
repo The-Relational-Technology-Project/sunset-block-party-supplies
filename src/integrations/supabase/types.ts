@@ -240,14 +240,8 @@ export type Database = {
           zip_code: string
         }[]
       }
-      is_user_steward: {
-        Args: { user_id: string }
-        Returns: boolean
-      }
-      is_user_vouched: {
-        Args: { user_id: string }
-        Returns: boolean
-      }
+      is_user_steward: { Args: { user_id: string }; Returns: boolean }
+      is_user_vouched: { Args: { user_id: string }; Returns: boolean }
     }
     Enums: {
       join_request_status: "pending" | "vouched" | "rejected"

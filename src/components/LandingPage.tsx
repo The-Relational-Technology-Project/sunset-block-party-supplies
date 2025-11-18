@@ -1,19 +1,22 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Gift, Users, Heart, Search, Plus, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthModal } from "./auth/AuthModal";
 import { Footer } from "./Footer";
+import { categories } from "@/data/categories";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 interface LandingPageProps {
   onTabChange: (tab: string) => void;
+  onSearch?: (query: string) => void;
 }
 
-export function LandingPage({ onTabChange }: LandingPageProps) {
+export function LandingPage({ onTabChange, onSearch }: LandingPageProps) {
   const [user, setUser] = useState<any>(null);
   const [modalMode, setModalMode] = useState<'login' | 'signup' | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const checkUser = async () => {
@@ -30,148 +33,113 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
     return () => subscription.unsubscribe();
   }, []);
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-blue-50">
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-16 text-center">
-        <div className="max-w-4xl mx-auto">
-          {/* Main Logo/Icon */}
-          <div className="flex justify-center mb-6">
-            <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-4 rounded-full shadow-lg">
-              <Gift className="h-12 w-12 text-white" />
-            </div>
-          </div>
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (onSearch) {
+      onSearch(searchQuery);
+    }
+    onTabChange('browse');
+  };
 
-          <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-blue-600 bg-clip-text text-transparent mb-4 leading-tight">
-            Community Party Supplies
+  return (
+    <div className="min-h-screen bg-sand flex flex-col">
+      {/* Hero Section */}
+      <section className="container mx-auto px-4 py-16 text-center flex-1">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-5xl md:text-6xl font-serif font-bold text-deep-brown mb-6 leading-tight">
+            Community Supplies
           </h1>
           
-          <p className="text-xl md:text-2xl text-gray-700 mb-3 font-medium">
-            Share supplies, build community 🎉
-          </p>
-          
-          <p className="text-lg text-gray-600 mb-10 max-w-2xl mx-auto">
-            Make amazing parties happen in the Sunset & Richmond neighborhoods! 
-            From bounce houses to birthday banners - we've got you covered.
+          <p className="text-xl text-dusk-pink mb-12">
+            Borrow what you need. Share what you have.
           </p>
 
-          {/* Authentication-aware CTAs */}
+          {/* Search Bar */}
+          <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-8">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search for tools, gear, supplies..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-12 h-14 text-lg border-2 border-border bg-card"
+              />
+            </div>
+          </form>
+
+          {/* CTAs */}
           {user ? (
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Button size="lg" onClick={() => onTabChange('browse')} className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-lg px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
-                <Search className="h-5 w-5 mr-2" />
-                Browse Supplies
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+              <Button 
+                size="lg" 
+                onClick={() => onTabChange('browse')} 
+                className="bg-terracotta hover:bg-terracotta/90 text-white text-base px-8 rounded-sm"
+              >
+                Browse All Items
               </Button>
-              <Button size="lg" variant="outline" onClick={() => onTabChange('add')} className="border-2 border-orange-500 text-orange-600 hover:bg-orange-50 text-lg px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
-                <Plus className="h-5 w-5 mr-2" />
-                Share Your Items
+              <Button 
+                size="lg" 
+                variant="outline" 
+                onClick={() => onTabChange('add')} 
+                className="border-2 border-terracotta text-terracotta hover:bg-terracotta/10 text-base px-8 rounded-sm"
+              >
+                Add an Item
               </Button>
             </div>
           ) : (
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Button size="lg" onClick={() => setModalMode('login')} className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-lg px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+              <Button 
+                size="lg" 
+                onClick={() => setModalMode('login')} 
+                className="bg-terracotta hover:bg-terracotta/90 text-white text-base px-8 rounded-sm"
+              >
                 Sign In
               </Button>
-              <Button size="lg" variant="outline" onClick={() => setModalMode('signup')} className="border-2 border-orange-500 text-orange-600 hover:bg-orange-50 text-lg px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
-                Join the Party
+              <Button 
+                size="lg" 
+                variant="outline" 
+                onClick={() => setModalMode('signup')} 
+                className="border-2 border-terracotta text-terracotta hover:bg-terracotta/10 text-base px-8 rounded-sm"
+              >
+                Join Our Community
               </Button>
             </div>
           )}
 
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-            <div className="text-center">
-              <div className="text-3xl mb-2">🎈</div>
-              <div className="text-xl font-bold text-gray-800">Share & Save</div>
-              <div className="text-gray-600">Why buy when you can borrow?</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl mb-2">🏡</div>
-              <div className="text-xl font-bold text-gray-800">Meet Neighbors</div>
-              <div className="text-gray-600">Help each other out</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl mb-2">🎊</div>
-              <div className="text-xl font-bold text-gray-800">Great Parties</div>
-              <div className="text-gray-600">Stress-free celebrations</div>
+          {/* Categories Grid */}
+          <div className="mb-16">
+            <h2 className="text-2xl font-serif font-semibold text-deep-brown mb-8">
+              Top Categories
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {categories.map((category) => {
+                const Icon = category.icon;
+                return (
+                  <button
+                    key={category.id}
+                    onClick={() => onTabChange('browse')}
+                    className="bg-card border border-terracotta/20 hover:border-terracotta hover:shadow-md transition-all p-6 rounded-sm group"
+                  >
+                    <Icon className="h-8 w-8 mx-auto mb-3 text-terracotta" />
+                    <div className="text-sm font-medium text-deep-brown group-hover:text-terracotta transition-colors">
+                      {category.name}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="container mx-auto px-4 py-12">
-        <h2 className="text-3xl font-bold text-center mb-3 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-          How It Works
-        </h2>
-        <p className="text-center text-gray-600 mb-10 text-lg">Simple, friendly, effective</p>
-        
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          <Card className="text-center p-6 hover:shadow-lg transition-shadow duration-300 bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
-            <CardContent className="pt-4">
-              <div className="bg-orange-500 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-md">
-                <Gift className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-orange-800">Share & Borrow</h3>
-              <p className="text-gray-700 leading-relaxed">
-                From bounce houses to birthday decorations - share what you have and borrow what you need.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="text-center p-6 hover:shadow-lg transition-shadow duration-300 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-            <CardContent className="pt-4">
-              <div className="bg-blue-500 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-md">
-                <Users className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-blue-800">Build Community</h3>
-              <p className="text-gray-700 leading-relaxed">
-                Connect with neighbors, meet amazing families, and strengthen our Sunset & Richmond community.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="text-center p-6 hover:shadow-lg transition-shadow duration-300 bg-gradient-to-br from-pink-50 to-pink-100 border-pink-200">
-            <CardContent className="pt-4">
-              <div className="bg-pink-500 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-md">
-                <Heart className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-pink-800">Make Life Easier</h3>
-              <p className="text-gray-700 leading-relaxed">
-                Save money, reduce waste, and make party planning easier for busy parents.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500 text-white py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Get Started?</h2>
-          <p className="text-xl mb-8 opacity-95">
-            Join your neighbors in making party planning easier and more fun!
-          </p>
-          {user ? (
-            <Button size="lg" variant="secondary" onClick={() => onTabChange('planner')} className="text-lg px-10 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 bg-white text-purple-600 hover:bg-gray-50">
-              <Sparkles className="h-5 w-5 mr-2" />
-              Plan Your Party
-            </Button>
-          ) : (
-            <Button size="lg" variant="secondary" onClick={() => setModalMode('signup')} className="text-lg px-10 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 bg-white text-purple-600 hover:bg-gray-50">
-              <Heart className="h-5 w-5 mr-2" />
-              Join Our Community
-            </Button>
-          )}
-        </div>
-      </section>
+      <Footer />
 
       <AuthModal
-        isOpen={modalMode !== null}
+        isOpen={!!modalMode}
+        mode={modalMode}
         onClose={() => setModalMode(null)}
-        mode={modalMode || 'login'}
       />
-      <Footer />
     </div>
   );
 }
