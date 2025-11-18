@@ -6,7 +6,7 @@ import { Footer } from "@/components/Footer";
 import { LandingPage } from "@/components/LandingPage";
 import { BrowseSupplies } from "@/components/BrowseSupplies";
 import { AddSupply } from "@/components/AddSupply";
-import { PartyPlanner } from "@/components/PartyPlanner";
+
 import { StewardDashboard } from "@/components/steward/StewardDashboard";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,7 +20,7 @@ const Index = () => {
   useEffect(() => {
     // Check for tab parameter in URL
     const tabParam = searchParams.get('tab');
-    if (tabParam && ['browse', 'add', 'planner', 'steward'].includes(tabParam)) {
+    if (tabParam && ['browse', 'add', 'steward'].includes(tabParam)) {
       setActiveTab(tabParam);
       // Clear the URL parameter after setting the tab
       setSearchParams({});
@@ -72,12 +72,6 @@ const Index = () => {
         return (
           <AuthGuard requireVouched>
             <AddSupply />
-          </AuthGuard>
-        );
-      case 'planner':
-        return (
-          <AuthGuard requireVouched>
-            <PartyPlanner />
           </AuthGuard>
         );
       case 'steward':
