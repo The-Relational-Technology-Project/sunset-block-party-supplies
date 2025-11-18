@@ -18,7 +18,16 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Inter', 'system-ui', 'sans-serif'],
+				serif: ['Source Serif 4', 'Georgia', 'serif'],
+			},
 			colors: {
+				sand: 'hsl(var(--sand))',
+				peach: 'hsl(var(--peach))',
+				terracotta: 'hsl(var(--terracotta))',
+				'dusk-pink': 'hsl(var(--dusk-pink))',
+				'deep-brown': 'hsl(var(--deep-brown))',
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
