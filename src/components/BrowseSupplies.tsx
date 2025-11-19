@@ -15,7 +15,7 @@ export function BrowseSupplies() {
   const { supplies, loading } = useSupplies();
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [conditionFilter, setConditionFilter] = useState("all");
-  const [zipCodeFilter, setZipCodeFilter] = useState("");
+  const [availabilityFilter, setAvailabilityFilter] = useState("all");
   const [selectedSupply, setSelectedSupply] = useState<Supply | null>(null);
   const [isSteward, setIsSteward] = useState(false);
 
@@ -34,11 +34,12 @@ export function BrowseSupplies() {
     return supplies.filter((supply) => {
       const matchesCategory = categoryFilter === "all" || supply.category === categoryFilter;
       const matchesCondition = conditionFilter === "all" || supply.condition === conditionFilter;
-      const matchesZip = !zipCodeFilter || supply.owner.zipCode.includes(zipCodeFilter);
+      const matchesAvailability = availabilityFilter === "all" || 
+        (availabilityFilter === "available" ? supply.dateAvailable : !supply.dateAvailable);
 
-      return matchesCategory && matchesCondition && matchesZip;
+      return matchesCategory && matchesCondition && matchesAvailability;
     });
-  }, [supplies, categoryFilter, conditionFilter, zipCodeFilter]);
+  }, [supplies, categoryFilter, conditionFilter, availabilityFilter]);
 
   if (loading) {
     return (
@@ -58,32 +59,21 @@ export function BrowseSupplies() {
         onCategoryChange={setCategoryFilter}
       />
       
-      <div className="flex-1 overflow-auto bg-background">
+      <div className="flex-1 overflow-auto bg-sand/30">
         <div className="container mx-auto px-6 py-8">
-          {/* Page Title */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-serif font-semibold text-deep-brown mb-2">
-              {categoryFilter === "all" ? "All Items" : 
-               categories.find(c => c.id === categoryFilter)?.name || "Items"}
-            </h1>
-            <p className="text-muted-foreground">
-              {filteredSupplies.length} {filteredSupplies.length === 1 ? 'item' : 'items'} available
-            </p>
-          </div>
-
           {/* Filters */}
-          <div className="bg-white border border-border rounded-sm p-4 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="text-sm font-medium text-deep-brown mb-2 block">
-                  Condition
+          <div className="bg-white border border-border rounded-sm p-3 mb-6 shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-medium text-muted-foreground">
+                  Condition:
                 </label>
                 <Select value={conditionFilter} onValueChange={setConditionFilter}>
-                  <SelectTrigger className="border-border">
-                    <SelectValue placeholder="Any Condition" />
+                  <SelectTrigger className="h-8 w-32 border-border bg-white text-xs">
+                    <SelectValue placeholder="Any" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Any Condition</SelectItem>
+                  <SelectContent className="bg-white">
+                    <SelectItem value="all">Any</SelectItem>
                     <SelectItem value="excellent">Excellent</SelectItem>
                     <SelectItem value="good">Good</SelectItem>
                     <SelectItem value="fair">Fair</SelectItem>
@@ -91,20 +81,24 @@ export function BrowseSupplies() {
                 </Select>
               </div>
 
-              <div>
-                <label className="text-sm font-medium text-deep-brown mb-2 block">
-                  ZIP Code
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-medium text-muted-foreground">
+                  Availability:
                 </label>
-                <Input
-                  placeholder="Filter by ZIP..."
-                  value={zipCodeFilter}
-                  onChange={(e) => setZipCodeFilter(e.target.value)}
-                  className="border-border"
-                />
+                <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
+                  <SelectTrigger className="h-8 w-32 border-border bg-white text-xs">
+                    <SelectValue placeholder="Any" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    <SelectItem value="all">Any</SelectItem>
+                    <SelectItem value="available">Available</SelectItem>
+                    <SelectItem value="unavailable">Unavailable</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               
               {isSteward && (
-                <div className="flex items-end">
+                <div className="ml-auto">
                   <QuickBatchGenerate />
                 </div>
               )}
