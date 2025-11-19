@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { MapPin, Calendar, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
+import { GenerateIllustrationButton } from "./GenerateIllustrationButton";
 
 interface ContactModalProps {
   supply: Supply | null;
@@ -21,7 +22,17 @@ export function ContactModal({ supply, isOpen, onClose }: ContactModalProps) {
   const [senderContact, setSenderContact] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const getUserId = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+    };
+    getUserId();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +84,10 @@ export function ContactModal({ supply, isOpen, onClose }: ContactModalProps) {
 
   if (!supply) return null;
 
+  const isOwner = currentUserId === supply.ownerId;
+  const images = supply.images || (supply.image ? [supply.image] : []);
+  const displayImage = images[selectedImageIndex] || null;
+
   const getConditionColor = (condition: string) => {
     switch (condition) {
       case 'excellent': return 'bg-peach/20 text-deep-brown border-peach';
@@ -91,15 +106,51 @@ export function ContactModal({ supply, isOpen, onClose }: ContactModalProps) {
         
         <div className="grid md:grid-cols-2 gap-6">
           <div className="space-y-4">
-            <div className="aspect-square bg-sand/30 rounded-sm flex items-center justify-center overflow-hidden border border-border">
-              {supply.image ? (
-                <img 
-                  src={supply.image} 
-                  alt={supply.name}
-                  className="w-full h-full object-cover"
+            {/* Image Gallery */}
+            <div className="space-y-2">
+              <div className="aspect-square bg-white rounded-sm flex items-center justify-center overflow-hidden border border-border">
+                {displayImage ? (
+                  <img 
+                    src={displayImage} 
+                    alt={supply.name}
+                    className="w-full h-full object-contain p-4"
+                  />
+                ) : (
+                  <div className="text-6xl text-muted-foreground">📦</div>
+                )}
+              </div>
+              
+              {/* Image thumbnails */}
+              {images.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto">
+                  {images.map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedImageIndex(idx)}
+                      className={`flex-shrink-0 w-16 h-16 border-2 rounded-sm overflow-hidden ${
+                        selectedImageIndex === idx ? 'border-terracotta' : 'border-border'
+                      }`}
+                    >
+                      <img src={img} alt={`${supply.name} ${idx + 1}`} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+              
+              {/* Generate Illustration Button for owners */}
+              {isOwner && !supply.illustration_url && (
+                <GenerateIllustrationButton
+                  supplyId={supply.id}
+                  itemName={supply.name}
+                  description={supply.description}
+                  imageUrl={images[0]}
+                  onGenerated={() => {
+                    toast({
+                      title: "Illustration generated!",
+                      description: "Your item now has a catalog-style illustration"
+                    });
+                  }}
                 />
-              ) : (
-                <div className="text-6xl text-sand">📦</div>
               )}
             </div>
             

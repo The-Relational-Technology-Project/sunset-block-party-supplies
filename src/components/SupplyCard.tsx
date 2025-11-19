@@ -8,24 +8,21 @@ interface SupplyCardProps {
 }
 
 export function SupplyCard({ supply, onViewContact }: SupplyCardProps) {
+  // Show illustration if available, otherwise show photo
+  const displayImage = supply.illustration_url || supply.images?.[0] || supply.image;
+  
   return (
     <Card 
       className="h-full hover:shadow-sm transition-shadow border-border cursor-pointer"
       onClick={() => onViewContact(supply)}
     >
       <CardContent className="p-0">
-        <div className="relative aspect-square bg-muted flex items-center justify-center overflow-hidden">
-          {supply.images && supply.images.length > 0 ? (
+        <div className="relative aspect-square bg-white flex items-center justify-center overflow-hidden">
+          {displayImage ? (
             <img 
-              src={supply.images[0]} 
+              src={displayImage} 
               alt={supply.name}
-              className="w-full h-full object-contain"
-            />
-          ) : supply.image ? (
-            <img 
-              src={supply.image} 
-              alt={supply.name}
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain p-3"
             />
           ) : (
             <div className="text-3xl text-muted-foreground">📦</div>
