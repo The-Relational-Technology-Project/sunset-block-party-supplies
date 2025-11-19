@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.generate-illustration]
 verify_jwt = true
+
+[functions.batch-generate-illustrations]
+verify_jwt = false

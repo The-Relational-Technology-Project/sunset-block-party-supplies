@@ -2,12 +2,11 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Users, Heart, UserCheck, Settings, Sparkles } from "lucide-react";
+import { Shield, Users, Heart, UserCheck, Settings } from "lucide-react";
 import { JoinRequestsManager } from "./JoinRequestsManager";
 import { CommunityOverview } from "./CommunityOverview";
 import { BulkCreateUsers } from "./BulkCreateUsers";
 import { VouchedUsersExport } from "./VouchedUsersExport";
-import { BatchGenerateIllustrations } from "./BatchGenerateIllustrations";
 
 export function StewardDashboard() {
   return (
@@ -21,7 +20,7 @@ export function StewardDashboard() {
       </div>
 
       <Tabs defaultValue="vouched-users" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="vouched-users" className="flex items-center gap-2">
             <UserCheck className="h-4 w-4" />
             Vouched Users
@@ -33,10 +32,6 @@ export function StewardDashboard() {
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Community Overview
-          </TabsTrigger>
-          <TabsTrigger value="illustrations" className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4" />
-            Illustrations
           </TabsTrigger>
           <TabsTrigger value="bulk-create" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -74,10 +69,6 @@ export function StewardDashboard() {
               <CommunityOverview />
             </CardContent>
           </Card>
-        </TabsContent>
-        
-        <TabsContent value="illustrations">
-          <BatchGenerateIllustrations />
         </TabsContent>
         
         <TabsContent value="bulk-create">
