@@ -36,7 +36,7 @@ export const CatalogHeader = ({ onSearch, searchQuery = "", onNavigate }: Catalo
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-card">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-sand">
       <div className="container mx-auto px-4 h-16 flex items-center gap-4">
         <button 
           onClick={() => onNavigate?.("home")}

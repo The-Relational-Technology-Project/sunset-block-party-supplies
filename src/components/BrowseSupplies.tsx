@@ -44,7 +44,7 @@ export function BrowseSupplies() {
         onCategoryChange={setCategoryFilter}
       />
       
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto bg-background">
         <div className="container mx-auto px-6 py-8">
           {/* Page Title */}
           <div className="mb-8">
@@ -94,12 +94,10 @@ export function BrowseSupplies() {
           {/* Results Grid */}
           {filteredSupplies.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-muted-foreground text-lg">
-                No supplies found matching your filters.
-              </p>
+              <p className="text-lg text-muted-foreground">No supplies found matching your criteria.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {filteredSupplies.map((supply) => (
                 <SupplyCard
                   key={supply.id}
