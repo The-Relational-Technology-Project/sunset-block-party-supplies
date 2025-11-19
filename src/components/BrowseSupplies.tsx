@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SupplyCard } from "./SupplyCard";
@@ -8,6 +8,8 @@ import { useSupplies } from "@/hooks/useSupplies";
 import { Loader2 } from "lucide-react";
 import { CategorySidebar } from "./CategorySidebar";
 import { categories } from "@/data/categories";
+import { QuickBatchGenerate } from "./steward/QuickBatchGenerate";
+import { supabase } from "@/integrations/supabase/client";
 
 export function BrowseSupplies() {
   const { supplies, loading } = useSupplies();
@@ -15,6 +17,18 @@ export function BrowseSupplies() {
   const [conditionFilter, setConditionFilter] = useState("all");
   const [zipCodeFilter, setZipCodeFilter] = useState("");
   const [selectedSupply, setSelectedSupply] = useState<Supply | null>(null);
+  const [isSteward, setIsSteward] = useState(false);
+
+  useEffect(() => {
+    const checkSteward = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase.rpc('is_user_steward', { user_id: user.id });
+        setIsSteward(data || false);
+      }
+    };
+    checkSteward();
+  }, []);
 
   const filteredSupplies = useMemo(() => {
     return supplies.filter((supply) => {
@@ -88,6 +102,12 @@ export function BrowseSupplies() {
                   className="border-border"
                 />
               </div>
+              
+              {isSteward && (
+                <div className="flex items-end">
+                  <QuickBatchGenerate />
+                </div>
+              )}
             </div>
           </div>
 
