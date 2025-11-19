@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTab] = useState('browse');
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -82,24 +82,9 @@ const Index = () => {
         );
       default:
         return (
-          <div className="text-center py-12">
-            <h1 className="text-3xl font-bold text-gray-800 mb-4">Welcome to Community Party Supplies!</h1>
-            <p className="text-lg text-gray-600 mb-6">Choose an option from the navigation above to get started.</p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button 
-                onClick={() => setActiveTab('browse')}
-                className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg shadow-md transition-colors"
-              >
-                Browse Supplies
-              </button>
-              <button 
-                onClick={() => setActiveTab('add')}
-                className="border-2 border-orange-500 text-orange-600 hover:bg-orange-50 px-6 py-3 rounded-lg shadow-md transition-colors"
-              >
-                Share Your Items
-              </button>
-            </div>
-          </div>
+          <AuthGuard requireVouched>
+            <BrowseSupplies />
+          </AuthGuard>
         );
     }
   };
