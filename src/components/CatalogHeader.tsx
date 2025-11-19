@@ -37,10 +37,10 @@ export const CatalogHeader = ({ onSearch, searchQuery = "", onNavigate }: Catalo
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-sand">
-      <div className="container mx-auto px-4 h-16 flex items-center gap-4">
+      <div className="container mx-auto px-6 h-16 flex items-center gap-8">
         <button 
           onClick={() => onNavigate?.("home")}
-          className="text-lg font-serif font-semibold text-deep-brown hover:text-terracotta transition-colors"
+          className="text-xl font-serif font-bold text-deep-brown hover:text-terracotta transition-colors whitespace-nowrap"
         >
           Community Supplies
         </button>
@@ -53,7 +53,7 @@ export const CatalogHeader = ({ onSearch, searchQuery = "", onNavigate }: Catalo
               placeholder="Search for tools, gear, supplies..."
               value={localQuery}
               onChange={(e) => setLocalQuery(e.target.value)}
-              className="pl-10 bg-input border-border"
+              className="pl-10 bg-white border-border"
             />
           </div>
         </form>
