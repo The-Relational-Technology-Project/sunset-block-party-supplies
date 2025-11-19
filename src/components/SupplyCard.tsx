@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Supply } from "@/types/supply";
 import { MapPin } from "lucide-react";
+import { categories } from "@/data/categories";
 
 interface SupplyCardProps {
   supply: Supply;
@@ -11,19 +12,25 @@ export function SupplyCard({ supply, onViewContact }: SupplyCardProps) {
   // Show illustration if available, otherwise show photo
   const displayImage = supply.illustration_url || supply.images?.[0] || supply.image;
   
+  // Get category icon for fallback
+  const categoryData = categories.find(c => c.id === supply.category);
+  const CategoryIcon = categoryData?.icon;
+  
   return (
     <Card 
       className="h-full hover:shadow-sm transition-shadow border-border cursor-pointer"
       onClick={() => onViewContact(supply)}
     >
       <CardContent className="p-0">
-        <div className="relative aspect-square bg-white flex items-center justify-center overflow-hidden">
+        <div className="relative aspect-square bg-white flex items-center justify-center overflow-hidden border border-border">
           {displayImage ? (
             <img 
               src={displayImage} 
               alt={supply.name}
               className="w-full h-full object-contain p-3"
             />
+          ) : CategoryIcon ? (
+            <CategoryIcon className="h-16 w-16 text-deep-brown/40 stroke-[1.5]" />
           ) : (
             <div className="text-3xl text-muted-foreground">📦</div>
           )}
