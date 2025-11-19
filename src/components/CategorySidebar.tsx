@@ -8,7 +8,7 @@ interface CategorySidebarProps {
 
 export const CategorySidebar = ({ selectedCategory, onCategoryChange }: CategorySidebarProps) => {
   return (
-    <aside className="w-56 border-r border-border bg-card shrink-0">
+    <aside className="w-56 border-r border-border bg-sand shrink-0">
       <div className="sticky top-0 p-4">
         <h2 className="text-sm font-semibold text-deep-brown mb-4">
           Choose a Category

@@ -38,7 +38,7 @@ export function BrowseSupplies() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen flex">
       <CategorySidebar 
         selectedCategory={categoryFilter}
         onCategoryChange={setCategoryFilter}
@@ -58,7 +58,7 @@ export function BrowseSupplies() {
           </div>
 
           {/* Filters */}
-          <div className="bg-card border border-border rounded-sm p-4 mb-8">
+          <div className="bg-white border border-border rounded-sm p-4 mb-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="text-sm font-medium text-deep-brown mb-2 block">
