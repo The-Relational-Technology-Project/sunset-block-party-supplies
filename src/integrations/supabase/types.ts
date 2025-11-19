@@ -125,6 +125,7 @@ export type Database = {
           description: string
           house_rules: string[] | null
           id: string
+          illustration_url: string | null
           image_url: string | null
           images: string[] | null
           location: string | null
@@ -143,6 +144,7 @@ export type Database = {
           description: string
           house_rules?: string[] | null
           id?: string
+          illustration_url?: string | null
           image_url?: string | null
           images?: string[] | null
           location?: string | null
@@ -161,6 +163,7 @@ export type Database = {
           description?: string
           house_rules?: string[] | null
           id?: string
+          illustration_url?: string | null
           image_url?: string | null
           images?: string[] | null
           location?: string | null

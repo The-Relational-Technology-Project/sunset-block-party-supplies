@@ -51,6 +51,7 @@ export function useSupplies() {
             contactEmail: item.contact_email,
             image: item.image_url,
             images: item.images || (item.image_url ? [item.image_url] : []),
+            illustration_url: item.illustration_url,
             houseRules: item.house_rules || [],
             ownerId: item.owner_id,
             owner: {

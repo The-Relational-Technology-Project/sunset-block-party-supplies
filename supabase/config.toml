@@ -1,1 +1,10 @@
 project_id = "mbmmfgivhqzhjyneyelu"
+
+[functions.bulk-create-users]
+verify_jwt = false
+
+[functions.send-contact-message]
+verify_jwt = false
+
+[functions.generate-illustration]
+verify_jwt = true

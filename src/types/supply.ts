@@ -10,6 +10,7 @@ export interface Supply {
   contactEmail?: string;
   image?: string; // Keep for backward compatibility
   images?: string[]; // New multiple images support
+  illustration_url?: string; // AI-generated minimalist illustration
   houseRules?: string[];
   ownerId?: string; // Add owner ID for database operations
   owner: {
