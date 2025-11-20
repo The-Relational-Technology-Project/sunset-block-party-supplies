@@ -6,10 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus } from "lucide-react";
+import { Loader2, Upload, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { HouseRules } from "@/components/HouseRules";
-import { MultipleImageUpload } from "@/components/MultipleImageUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { categories } from "@/data/categories";
 
@@ -18,13 +17,15 @@ export function AddSupply() {
   const [user, setUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [customPartyType, setCustomPartyType] = useState("");
+  const [isDraftingWithAI, setIsDraftingWithAI] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<string>("");
+  const [showForm, setShowForm] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     category: "",
-    condition: "good",
+    condition: "good" as "excellent" | "good" | "fair",
     zipCode: "",
     location: "",
     contactEmail: "",
@@ -48,16 +49,76 @@ export function AddSupply() {
         
         if (profile) {
           setUserProfile(profile);
-          setFormData(prev => ({
-            ...prev,
-            contactEmail: profile.email || user.email || "",
-            zipCode: profile.zip_code || "",
-          }));
         }
       }
     };
     getUserAndProfile();
   }, []);
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be less than 5MB");
+      return;
+    }
+
+    if (!user) {
+      toast.error("You must be logged in to add items");
+      return;
+    }
+
+    setIsDraftingWithAI(true);
+
+    try {
+      // Convert image to data URL
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const imageDataUrl = reader.result as string;
+        setUploadedImage(imageDataUrl);
+
+        // Call AI to draft the item
+        const { data, error } = await supabase.functions.invoke('draft-item-from-image', {
+          body: {
+            imageUrl: imageDataUrl,
+            userId: user.id
+          }
+        });
+
+        if (error) {
+          console.error('AI draft error:', error);
+          toast.error('Failed to analyze image. Please try again.');
+          setIsDraftingWithAI(false);
+          return;
+        }
+
+        // Pre-fill form with AI-generated data
+        setFormData({
+          name: data.name || "",
+          description: data.description || "",
+          category: data.category || "",
+          condition: data.condition || "good",
+          zipCode: data.zipCode || userProfile?.zip_code || "",
+          location: data.location || "",
+          contactEmail: data.contactEmail || userProfile?.email || user.email || "",
+          partyTypes: data.partyTypes || [],
+          images: [imageDataUrl],
+        });
+
+        setHouseRules(data.houseRules || []);
+        setShowForm(true);
+        setIsDraftingWithAI(false);
+        toast.success("✨ Item details drafted by AI! Review and edit as needed.");
+      };
+
+      reader.readAsDataURL(file);
+    } catch (error: any) {
+      console.error('Error processing image:', error);
+      toast.error('Failed to process image. Please try again.');
+      setIsDraftingWithAI(false);
+    }
+  };
 
   const handlePartyTypeChange = (partyType: string, checked: boolean) => {
     setFormData(prev => ({
@@ -66,16 +127,6 @@ export function AddSupply() {
         ? [...prev.partyTypes, partyType]
         : prev.partyTypes.filter(type => type !== partyType)
     }));
-  };
-
-  const handleAddCustomPartyType = () => {
-    if (customPartyType.trim() && !formData.partyTypes.includes(customPartyType.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        partyTypes: [...prev.partyTypes, customPartyType.trim()]
-      }));
-      setCustomPartyType("");
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,10 +145,11 @@ export function AddSupply() {
     setIsLoading(true);
     
     try {
-      const { data, error } = await supabase
+      // Insert the item
+      const { data: insertedData, error } = await supabase
         .from('supplies')
         .insert([
-           {
+          {
             name: formData.name,
             description: formData.description,
             category: formData.category,
@@ -116,8 +168,25 @@ export function AddSupply() {
 
       if (error) throw error;
 
-      toast.success("Item added successfully!");
+      const supplyId = insertedData[0].id;
+
+      // Auto-generate illustration in the background
+      supabase.functions.invoke('generate-illustration', {
+        body: {
+          supplyId,
+          itemName: formData.name,
+          description: formData.description,
+          imageUrl: formData.images[0]
+        }
+      }).then(({ error: illustrationError }) => {
+        if (illustrationError) {
+          console.error('Illustration generation failed:', illustrationError);
+        }
+      });
+
+      toast.success("Item added successfully! Generating illustration...");
       
+      // Reset form
       setFormData({
         name: "",
         description: "",
@@ -130,6 +199,8 @@ export function AddSupply() {
         images: [],
       });
       setHouseRules([]);
+      setUploadedImage("");
+      setShowForm(false);
       
       navigate('/?tab=browse');
     } catch (error: any) {
@@ -144,10 +215,11 @@ export function AddSupply() {
     "Birthday",
     "Baby Shower",
     "Wedding",
+    "Anniversary",
     "Holiday",
-    "BBQ",
-    "Sports",
-    "School Event",
+    "Graduation",
+    "Corporate Event",
+    "Sports Event",
     "Other"
   ];
 
@@ -163,189 +235,269 @@ export function AddSupply() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="bg-card border border-border rounded-sm p-6 space-y-6">
-            <h2 className="text-lg font-serif font-semibold text-deep-brown">Basic Information</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="md:col-span-2">
-                <Label htmlFor="name" className="text-deep-brown font-medium">
-                  Item Name *
-                </Label>
-                <Input
-                  id="name"
-                  placeholder="e.g., Folding Tables (2)"
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  className="border-border mt-1"
-                  required
-                />
+        {!showForm ? (
+          <div className="bg-card border border-border rounded-sm p-12">
+            <div className="text-center space-y-6">
+              <div className="flex justify-center">
+                <div className="w-24 h-24 rounded-full bg-accent/10 flex items-center justify-center">
+                  <Upload className="w-12 h-12 text-accent" />
+                </div>
               </div>
-
-              <div className="md:col-span-2">
-                <Label htmlFor="description" className="text-deep-brown font-medium">
-                  Description *
-                </Label>
-                <Textarea
-                  id="description"
-                  placeholder="Describe the item, its condition, and any important details..."
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  className="border-border mt-1 min-h-[100px]"
-                  required
-                />
+              
+              <div>
+                <h2 className="text-2xl font-serif font-semibold text-deep-brown mb-2">
+                  Upload a Photo
+                </h2>
+                <p className="text-muted-foreground">
+                  Take a photo of your item and our AI will help draft the listing
+                </p>
               </div>
 
               <div>
-                <Label htmlFor="category" className="text-deep-brown font-medium">
-                  Category *
-                </Label>
-                <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
-                  <SelectTrigger className="border-border mt-1">
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.filter(c => c.id !== 'all').map(category => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="condition" className="text-deep-brown font-medium">
-                  Condition *
-                </Label>
-                <Select value={formData.condition} onValueChange={(value) => setFormData(prev => ({ ...prev, condition: value }))}>
-                  <SelectTrigger className="border-border mt-1">
-                    <SelectValue placeholder="Select condition" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="excellent">Excellent</SelectItem>
-                    <SelectItem value="good">Good</SelectItem>
-                    <SelectItem value="fair">Fair</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-card border border-border rounded-sm p-6 space-y-4">
-            <h2 className="text-lg font-serif font-semibold text-deep-brown">Photos</h2>
-            <p className="text-sm text-muted-foreground">Add photos to help others see what you're sharing</p>
-            <MultipleImageUpload
-              currentImages={formData.images}
-              onImagesChange={(images) => setFormData(prev => ({ ...prev, images }))}
-            />
-          </div>
-
-          <div className="bg-card border border-border rounded-sm p-6 space-y-6">
-            <h2 className="text-lg font-serif font-semibold text-deep-brown">Location & Contact</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="zipCode" className="text-deep-brown font-medium">
-                  ZIP Code
-                </Label>
-                <Input
-                  id="zipCode"
-                  placeholder="94122"
-                  value={formData.zipCode}
-                  onChange={(e) => setFormData(prev => ({ ...prev, zipCode: e.target.value }))}
-                  className="border-border mt-1"
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  id="image-upload"
+                  disabled={isDraftingWithAI}
                 />
-              </div>
-
-              <div>
-                <Label htmlFor="location" className="text-deep-brown font-medium">
-                  Neighborhood / Intersection
-                </Label>
-                <Input
-                  id="location"
-                  placeholder="e.g., 46th & Judah"
-                  value={formData.location}
-                  onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                  className="border-border mt-1"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <Label htmlFor="contactEmail" className="text-deep-brown font-medium">
-                  Contact Email *
-                </Label>
-                <Input
-                  id="contactEmail"
-                  type="email"
-                  placeholder="your-email@example.com"
-                  value={formData.contactEmail}
-                  onChange={(e) => setFormData(prev => ({ ...prev, contactEmail: e.target.value }))}
-                  className="border-border mt-1"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-card border border-border rounded-sm p-6 space-y-4">
-            <h2 className="text-lg font-serif font-semibold text-deep-brown">Suitable For (Optional)</h2>
-            <p className="text-sm text-muted-foreground">What types of events or occasions is this item good for?</p>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {partyTypeOptions.map((type) => (
-                <label key={type} className="flex items-center gap-2 cursor-pointer">
-                  <Checkbox
-                    checked={formData.partyTypes.includes(type)}
-                    onCheckedChange={(checked) => handlePartyTypeChange(type, checked as boolean)}
-                  />
-                  <span className="text-sm text-foreground">{type}</span>
+                <label htmlFor="image-upload">
+                  <Button
+                    type="button"
+                    size="lg"
+                    className="cursor-pointer"
+                    disabled={isDraftingWithAI}
+                    asChild
+                  >
+                    <span>
+                      {isDraftingWithAI ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Analyzing with AI...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="mr-2 h-5 w-5" />
+                          Choose Photo
+                        </>
+                      )}
+                    </span>
+                  </Button>
                 </label>
-              ))}
+              </div>
+
+              <p className="text-sm text-muted-foreground">
+                Maximum file size: 5MB
+              </p>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Image Preview */}
+            {uploadedImage && (
+              <div className="bg-card border border-border rounded-sm p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <Sparkles className="w-5 h-5 text-accent" />
+                  <h2 className="text-lg font-serif font-semibold text-deep-brown">
+                    AI-Drafted Listing
+                  </h2>
+                </div>
+                <img 
+                  src={uploadedImage} 
+                  alt="Uploaded item" 
+                  className="w-full h-64 object-cover rounded-sm"
+                />
+                <p className="text-sm text-muted-foreground mt-4">
+                  Review and edit the details below before publishing
+                </p>
+              </div>
+            )}
+
+            {/* Basic Information */}
+            <div className="bg-card border border-border rounded-sm p-6 space-y-6">
+              <h2 className="text-lg font-serif font-semibold text-deep-brown">Item Details</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="md:col-span-2">
+                  <Label htmlFor="name" className="text-deep-brown font-medium">
+                    Item Name *
+                  </Label>
+                  <Input
+                    id="name"
+                    placeholder="e.g., Folding Tables (2)"
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    className="border-border mt-1"
+                    required
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <Label htmlFor="description" className="text-deep-brown font-medium">
+                    Description *
+                  </Label>
+                  <Textarea
+                    id="description"
+                    placeholder="Describe the item, its condition, and any important details..."
+                    value={formData.description}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    className="border-border mt-1 min-h-[100px]"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="category" className="text-deep-brown font-medium">
+                    Category *
+                  </Label>
+                  <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
+                    <SelectTrigger className="border-border mt-1">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.filter(c => c.id !== 'all').map(category => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="condition" className="text-deep-brown font-medium">
+                    Condition *
+                  </Label>
+                  <Select value={formData.condition} onValueChange={(value) => setFormData(prev => ({ ...prev, condition: value as any }))}>
+                    <SelectTrigger className="border-border mt-1">
+                      <SelectValue placeholder="Select condition" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="excellent">Excellent</SelectItem>
+                      <SelectItem value="good">Good</SelectItem>
+                      <SelectItem value="fair">Fair</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
 
-            <div className="flex gap-2">
-              <Input
-                placeholder="Add custom type..."
-                value={customPartyType}
-                onChange={(e) => setCustomPartyType(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomPartyType())}
-                className="border-border"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleAddCustomPartyType}
-                className="shrink-0"
+            {/* Location & Contact */}
+            <div className="bg-card border border-border rounded-sm p-6 space-y-6">
+              <h2 className="text-lg font-serif font-semibold text-deep-brown">Location & Contact</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="zipCode" className="text-deep-brown font-medium">
+                    ZIP Code
+                  </Label>
+                  <Input
+                    id="zipCode"
+                    placeholder="e.g., 10001"
+                    value={formData.zipCode}
+                    onChange={(e) => setFormData(prev => ({ ...prev, zipCode: e.target.value }))}
+                    className="border-border mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="location" className="text-deep-brown font-medium">
+                    Neighborhood/Area
+                  </Label>
+                  <Input
+                    id="location"
+                    placeholder="e.g., Upper West Side"
+                    value={formData.location}
+                    onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                    className="border-border mt-1"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <Label htmlFor="contactEmail" className="text-deep-brown font-medium">
+                    Contact Email *
+                  </Label>
+                  <Input
+                    id="contactEmail"
+                    type="email"
+                    placeholder="your.email@example.com"
+                    value={formData.contactEmail}
+                    onChange={(e) => setFormData(prev => ({ ...prev, contactEmail: e.target.value }))}
+                    className="border-border mt-1"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Party Types */}
+            <div className="bg-card border border-border rounded-sm p-6 space-y-6">
+              <h2 className="text-lg font-serif font-semibold text-deep-brown">Suitable For</h2>
+              <p className="text-sm text-muted-foreground -mt-2">
+                Select the types of parties this item is suitable for
+              </p>
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {partyTypeOptions.map(type => (
+                  <div key={type} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={type}
+                      checked={formData.partyTypes.includes(type)}
+                      onCheckedChange={(checked) => handlePartyTypeChange(type, checked as boolean)}
+                    />
+                    <Label 
+                      htmlFor={type} 
+                      className="text-sm font-normal cursor-pointer"
+                    >
+                      {type}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Borrowing Guidelines */}
+            <div className="bg-card border border-border rounded-sm p-6 space-y-6">
+              <h2 className="text-lg font-serif font-semibold text-deep-brown">Borrowing Guidelines</h2>
+              <p className="text-sm text-muted-foreground -mt-2">
+                Set clear expectations for borrowers
+              </p>
+              
+              <HouseRules rules={houseRules} onRulesChange={setHouseRules} />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-4">
+              <Button 
+                type="submit" 
+                size="lg"
+                disabled={isLoading}
+                className="flex-1"
               >
-                <Plus className="h-4 w-4" />
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Publishing...
+                  </>
+                ) : (
+                  "Publish Item"
+                )}
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="lg"
+                onClick={() => {
+                  setShowForm(false);
+                  setUploadedImage("");
+                }}
+              >
+                Start Over
               </Button>
             </div>
-          </div>
-
-          <div className="bg-card border border-border rounded-sm p-6 space-y-4">
-            <h2 className="text-lg font-serif font-semibold text-deep-brown">Borrowing Guidelines (Optional)</h2>
-            <p className="text-sm text-muted-foreground">Set any rules or expectations for borrowing this item</p>
-            <HouseRules rules={houseRules} onRulesChange={setHouseRules} />
-          </div>
-
-          <div className="flex gap-4">
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="flex-1"
-            >
-              {isLoading ? "Adding Item..." : "Add Item"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate('/')}
-            >
-              Cancel
-            </Button>
-          </div>
-        </form>
+          </form>
+        )}
       </div>
     </div>
   );
