@@ -163,7 +163,7 @@ export default function MySupplies() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Header activeTab="" onTabChange={handleTabChange} />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Loading your supplies...</div>
@@ -173,7 +173,7 @@ export default function MySupplies() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header activeTab="" onTabChange={handleTabChange} />
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center gap-4 mb-6">
@@ -187,7 +187,7 @@ export default function MySupplies() {
         {supplies.length === 0 ? (
           <Card>
             <CardContent className="text-center py-12">
-              <p className="text-gray-500 mb-4">You haven't added any supplies yet.</p>
+              <p className="text-muted-foreground mb-4">You haven't added any supplies yet.</p>
               <Button onClick={handleGoBack}>Add Your First Supply</Button>
             </CardContent>
           </Card>
@@ -199,7 +199,7 @@ export default function MySupplies() {
                   {supply.images && supply.images.length > 0 ? (
                     <div className="grid grid-cols-2 gap-2 mb-4">
                       {supply.images.slice(0, 4).map((image, index) => (
-                        <div key={index} className="aspect-square bg-gradient-to-br from-orange-100 to-orange-200 rounded-lg overflow-hidden">
+                        <div key={index} className="aspect-square bg-gradient-to-br from-accent/20 to-accent/40 rounded-lg overflow-hidden">
                           <img 
                             src={image} 
                             alt={`${supply.name} ${index + 1}`}
@@ -209,7 +209,7 @@ export default function MySupplies() {
                       ))}
                     </div>
                   ) : supply.image && (
-                    <div className="aspect-video bg-gradient-to-br from-orange-100 to-orange-200 rounded-lg overflow-hidden mb-4">
+                    <div className="aspect-video bg-gradient-to-br from-accent/20 to-accent/40 rounded-lg overflow-hidden mb-4">
                       <img 
                         src={supply.image} 
                         alt={supply.name}
@@ -294,13 +294,13 @@ export default function MySupplies() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      <p className="text-gray-600 text-sm">{supply.description}</p>
+                      <p className="text-muted-foreground text-sm">{supply.description}</p>
                       
                       {supply.location && (
-                        <p className="text-sm text-gray-500">📍 {supply.location}</p>
+                        <p className="text-sm text-muted-foreground">📍 {supply.location}</p>
                       )}
                       
-                      <p className="text-sm text-gray-500">📅 Available: {supply.dateAvailable}</p>
+                      <p className="text-sm text-muted-foreground">📅 Available: {supply.dateAvailable}</p>
                       
                       {supply.partyTypes.length > 0 && (
                         <div className="flex flex-wrap gap-1">

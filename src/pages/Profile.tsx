@@ -128,7 +128,7 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Header activeTab="" onTabChange={handleTabChange} />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Loading your profile...</div>
@@ -138,7 +138,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header activeTab="" onTabChange={handleTabChange} />
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <div className="flex items-center gap-4 mb-6">
@@ -151,11 +151,11 @@ export default function Profile() {
 
         <Card>
           <CardHeader className="text-center">
-            <div className="mx-auto w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mb-4">
-              <User className="h-8 w-8 text-white" />
+            <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4">
+              <User className="h-8 w-8 text-primary-foreground" />
             </div>
             <CardTitle className="text-xl md:text-2xl">Your Profile</CardTitle>
-            <p className="text-gray-600 text-sm md:text-base">
+            <p className="text-muted-foreground text-sm md:text-base">
               This information is used to auto-populate the supply sharing form and connect with community members.
             </p>
           </CardHeader>
@@ -172,7 +172,7 @@ export default function Profile() {
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                     required
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     This name will be shown when you share supplies
                   </p>
                 </div>
@@ -187,7 +187,7 @@ export default function Profile() {
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                     required
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     This will be auto-populated as your contact email for supplies
                   </p>
                 </div>
@@ -201,7 +201,7 @@ export default function Profile() {
                     onChange={(e) => setFormData(prev => ({ ...prev, zip_code: e.target.value }))}
                     maxLength={5}
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Helps community members find supplies near them
                   </p>
                 </div>
@@ -214,7 +214,7 @@ export default function Profile() {
                     value={formData.intro_text}
                     onChange={(e) => setFormData(prev => ({ ...prev, intro_text: e.target.value }))}
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     A brief introduction that other community members can see
                   </p>
                 </div>
@@ -223,7 +223,7 @@ export default function Profile() {
               <Button 
                 type="submit" 
                 disabled={saving}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-lg py-3"
+                className="w-full text-lg py-3"
               >
                 {saving ? (
                   <>
