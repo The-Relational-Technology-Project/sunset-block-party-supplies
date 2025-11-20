@@ -1,22 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthModal } from "./auth/AuthModal";
 import { Footer } from "./Footer";
 import { categories } from "@/data/categories";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
 
 interface LandingPageProps {
   onTabChange: (tab: string) => void;
-  onSearch?: (query: string) => void;
 }
 
-export function LandingPage({ onTabChange, onSearch }: LandingPageProps) {
+export function LandingPage({ onTabChange }: LandingPageProps) {
   const [user, setUser] = useState<any>(null);
   const [modalMode, setModalMode] = useState<'login' | 'signup' | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const checkUser = async () => {
@@ -33,18 +28,34 @@ export function LandingPage({ onTabChange, onSearch }: LandingPageProps) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (onSearch) {
-      onSearch(searchQuery);
-    }
-    onTabChange('browse');
-  };
-
   return (
-    <div className="min-h-screen bg-sand flex flex-col">
+    <div className="min-h-screen bg-sand flex flex-col relative overflow-hidden">
+      {/* Decorative hand-drawn supplies in background */}
+      <div className="absolute inset-0 pointer-events-none opacity-5">
+        <img 
+          src="/lovable-uploads/hand-drawn-supplies-1.png" 
+          alt="" 
+          className="absolute top-20 left-10 w-32 h-32 rotate-12 hidden md:block"
+        />
+        <img 
+          src="/lovable-uploads/hand-drawn-supplies-2.png" 
+          alt="" 
+          className="absolute top-40 right-20 w-28 h-28 -rotate-6 hidden lg:block"
+        />
+        <img 
+          src="/lovable-uploads/hand-drawn-supplies-3.png" 
+          alt="" 
+          className="absolute bottom-40 left-20 w-36 h-36 rotate-6 hidden md:block"
+        />
+        <img 
+          src="/lovable-uploads/hand-drawn-supplies-4.png" 
+          alt="" 
+          className="absolute bottom-20 right-32 w-32 h-32 -rotate-12 hidden lg:block"
+        />
+      </div>
+
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-8 sm:py-16 text-center flex-1">
+      <section className="container mx-auto px-4 py-8 sm:py-16 text-center flex-1 relative z-10">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-deep-brown mb-4 sm:mb-6 leading-tight">
             Community Supplies
@@ -53,20 +64,6 @@ export function LandingPage({ onTabChange, onSearch }: LandingPageProps) {
           <p className="text-lg sm:text-xl text-dusk-pink mb-8 sm:mb-12">
             Borrow what you need. Share what you have.
           </p>
-
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-6 sm:mb-8">
-            <div className="relative">
-              <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search for tools, gear, supplies..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 sm:pl-12 h-12 sm:h-14 text-base sm:text-lg border-2 border-border bg-card"
-              />
-            </div>
-          </form>
 
           {/* CTAs */}
           {user ? (
@@ -110,7 +107,7 @@ export function LandingPage({ onTabChange, onSearch }: LandingPageProps) {
           {/* Categories Grid */}
           <div className="mb-8 sm:mb-16">
             <h2 className="text-xl sm:text-2xl font-serif font-semibold text-deep-brown mb-6 sm:mb-8">
-              Top Categories
+              What We're Sharing
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
               {categories.map((category) => {
