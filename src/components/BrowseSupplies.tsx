@@ -5,7 +5,7 @@ import { SupplyCard } from "./SupplyCard";
 import { ContactModal } from "./ContactModal";
 import { Supply } from "@/types/supply";
 import { useSupplies } from "@/hooks/useSupplies";
-import { Loader2, SlidersHorizontal } from "lucide-react";
+import { Loader2, SlidersHorizontal, Search } from "lucide-react";
 import { CategorySidebar } from "./CategorySidebar";
 import { categories } from "@/data/categories";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +18,7 @@ export function BrowseSupplies() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [conditionFilter, setConditionFilter] = useState("all");
   const [availabilityFilter, setAvailabilityFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedSupply, setSelectedSupply] = useState<Supply | null>(null);
 
   const filteredSupplies = useMemo(() => {
@@ -26,10 +27,14 @@ export function BrowseSupplies() {
       const matchesCondition = conditionFilter === "all" || supply.condition === conditionFilter;
       const matchesAvailability = availabilityFilter === "all" || 
         (availabilityFilter === "available" ? supply.dateAvailable : !supply.dateAvailable);
+      const matchesSearch = searchQuery === "" || 
+        supply.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        supply.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        supply.category.toLowerCase().includes(searchQuery.toLowerCase());
 
-      return matchesCategory && matchesCondition && matchesAvailability;
+      return matchesCategory && matchesCondition && matchesAvailability && matchesSearch;
     });
-  }, [supplies, categoryFilter, conditionFilter, availabilityFilter]);
+  }, [supplies, categoryFilter, conditionFilter, availabilityFilter, searchQuery]);
 
   if (loading) {
     return (
@@ -107,14 +112,30 @@ export function BrowseSupplies() {
               <SheetTrigger asChild>
                 <Button variant="outline" className="flex-1 bg-white">
                   <SlidersHorizontal className="h-4 w-4 mr-2" />
-                  Filters
+                  Search & Filters
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-72">
                 <SheetHeader>
-                  <SheetTitle>Filters</SheetTitle>
+                  <SheetTitle>Search & Filters</SheetTitle>
                 </SheetHeader>
                 <div className="space-y-6 mt-6">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      Search
+                    </label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="search"
+                        placeholder="Search supplies..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <label className="text-sm font-medium mb-2 block">
                       Condition

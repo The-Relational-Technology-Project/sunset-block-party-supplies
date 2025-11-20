@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -15,6 +16,7 @@ interface Profile {
 }
 
 export function UserProfile() {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const { toast } = useToast();
 
@@ -80,11 +82,11 @@ export function UserProfile() {
             </div>
           </div>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => window.location.href = '/profile'}>
+          <DropdownMenuItem onClick={() => navigate('/profile')}>
             <Settings className="mr-2 h-4 w-4" />
             Profile Settings
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => window.location.href = '/my-supplies'}>
+          <DropdownMenuItem onClick={() => navigate('/my-supplies')}>
             <Package className="mr-2 h-4 w-4" />
             My Supplies
           </DropdownMenuItem>
