@@ -122,29 +122,31 @@ export function JoinRequestForm() {
   };
 
   return (
-    <Card className="max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>Request to Join Our Community</CardTitle>
-        <CardDescription>
+    <Card className="max-w-2xl mx-auto my-4 sm:my-8">
+      <CardHeader className="px-4 sm:px-6 pt-4 sm:pt-6">
+        <CardTitle className="text-xl sm:text-2xl">Request to Join Our Community</CardTitle>
+        <CardDescription className="text-sm sm:text-base">
           We're a trust-based community in the Sunset & Richmond neighborhoods. 
           Create your account and a community steward will review your application.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div>
-            <Label htmlFor="name">Full Name</Label>
+            <Label htmlFor="name" className="text-sm sm:text-base">Full Name</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Your full name"
               required
+              className="h-11 sm:h-10 text-base"
+              autoComplete="name"
             />
           </div>
           
           <div>
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="text-sm sm:text-base">Email</Label>
             <Input
               id="email"
               type="email"
@@ -152,11 +154,13 @@ export function JoinRequestForm() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="your@email.com"
               required
+              className="h-11 sm:h-10 text-base"
+              autoComplete="email"
             />
           </div>
           
           <div>
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="text-sm sm:text-base">Password</Label>
             <Input
               id="password"
               type="password"
@@ -165,27 +169,31 @@ export function JoinRequestForm() {
               placeholder="Create a password"
               required
               minLength={6}
+              className="h-11 sm:h-10 text-base"
+              autoComplete="new-password"
             />
           </div>
           
           <div>
-            <Label htmlFor="crossStreets">What are your cross streets?</Label>
+            <Label htmlFor="crossStreets" className="text-sm sm:text-base">What are your cross streets?</Label>
             <Input
               id="crossStreets"
               value={crossStreets}
               onChange={(e) => setCrossStreets(e.target.value)}
               placeholder="e.g., 25th Ave & Irving St"
               required
+              className="h-11 sm:h-10 text-base"
+              autoComplete="street-address"
             />
           </div>
           
           <div>
-            <Label htmlFor="referralSource">Who told you about Community Supplies?</Label>
+            <Label htmlFor="referralSource" className="text-sm sm:text-base">Who told you about Community Supplies?</Label>
             <Select value={referralSource} onValueChange={setReferralSource} required>
-              <SelectTrigger id="referralSource">
+              <SelectTrigger id="referralSource" className="h-11 sm:h-10 text-base">
                 <SelectValue placeholder="Select an option" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-popover">
                 <SelectItem value="community_member">Community member</SelectItem>
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
@@ -193,10 +201,10 @@ export function JoinRequestForm() {
           </div>
           
           {referralSource === 'other' && (
-            <div className="space-y-2">
-              <Label>Are you open to a quick call with one of our stewards?</Label>
+            <div className="space-y-2 sm:space-y-3">
+              <Label className="text-sm sm:text-base">Are you open to a quick call with one of our stewards?</Label>
               <div className="space-y-2">
-                <Label htmlFor="phoneNumber" className="text-sm text-muted-foreground">
+                <Label htmlFor="phoneNumber" className="text-xs sm:text-sm text-muted-foreground">
                   If yes, enter your phone number:
                 </Label>
                 <Input
@@ -205,24 +213,28 @@ export function JoinRequestForm() {
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   placeholder="(555) 123-4567"
+                  className="h-11 sm:h-10 text-base"
+                  autoComplete="tel"
                 />
               </div>
             </div>
           )}
           
           <div>
-            <Label htmlFor="captcha">What is {captchaQuestion.question}?</Label>
+            <Label htmlFor="captcha" className="text-sm sm:text-base">What is {captchaQuestion.question}?</Label>
             <Input
               id="captcha"
               type="number"
+              inputMode="numeric"
               value={captchaAnswer}
               onChange={(e) => setCaptchaAnswer(e.target.value)}
               placeholder="Your answer"
               required
+              className="h-11 sm:h-10 text-base"
             />
           </div>
           
-          <Button type="submit" disabled={loading} className="w-full">
+          <Button type="submit" disabled={loading} className="w-full h-11 sm:h-10 text-base mt-2">
             {loading ? "Submitting..." : "Submit Request to Join"}
           </Button>
         </form>

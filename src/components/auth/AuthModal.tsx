@@ -146,55 +146,61 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>{getTitle()}</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-y-auto flex-1 px-1">
           {mode === 'join-request' ? (
             <>
               <div>
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name" className="text-sm">Full Name</Label>
                 <Input
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your full name"
+                  className="h-11 text-base"
+                  autoComplete="name"
                 />
               </div>
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-sm">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
+                  className="h-11 text-base"
+                  autoComplete="email"
                 />
               </div>
               <div>
-                <Label htmlFor="intro">Introduction</Label>
+                <Label htmlFor="intro" className="text-sm">Introduction</Label>
                 <Textarea
                   id="intro"
                   value={intro}
                   onChange={(e) => setIntro(e.target.value)}
                   placeholder="Tell us about yourself and why you'd like to join..."
                   rows={3}
+                  className="text-base resize-none"
                 />
               </div>
               <div>
-                <Label htmlFor="connection">Connection to Community</Label>
+                <Label htmlFor="connection" className="text-sm">Connection to Community</Label>
                 <Textarea
                   id="connection"
                   value={connectionContext}
                   onChange={(e) => setConnectionContext(e.target.value)}
                   placeholder="How did you hear about us? Do you know any current members?"
                   rows={2}
+                  className="text-base resize-none"
                 />
               </div>
-              <Button onClick={handleJoinRequest} disabled={loading} className="w-full">
-                Submit Request
+              <Button onClick={handleJoinRequest} disabled={loading} className="w-full h-11">
+                {loading ? "Submitting..." : "Submit Request"}
               </Button>
             </>
           ) : (
@@ -202,22 +208,25 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
               {mode === 'signup' && (
                 <>
                   <div>
-                    <Label htmlFor="name">Full Name</Label>
+                    <Label htmlFor="name" className="text-sm">Full Name</Label>
                     <Input
                       id="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Your full name"
+                      className="h-11 text-base"
+                      autoComplete="name"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="connection">How did you hear about us?</Label>
+                    <Label htmlFor="connection" className="text-sm">How did you hear about us?</Label>
                     <Textarea
                       id="connection"
                       value={connectionContext}
                       onChange={(e) => setConnectionContext(e.target.value)}
                       placeholder="Who referred you or how did you find out about this community?"
                       rows={2}
+                      className="text-base resize-none"
                     />
                   </div>
                   
@@ -232,51 +241,59 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
                   </div>
                   
                   <div>
-                    <Label htmlFor="captcha">{captchaQuestion.question}</Label>
+                    <Label htmlFor="captcha" className="text-sm">{captchaQuestion.question}</Label>
                     <Input
                       id="captcha"
                       type="number"
+                      inputMode="numeric"
                       value={captchaAnswer}
                       onChange={(e) => setCaptchaAnswer(e.target.value)}
                       placeholder="Enter the answer"
                       required
+                      className="h-11 text-base"
                     />
                   </div>
                 </>
               )}
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-sm">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
+                  className="h-11 text-base"
+                  autoComplete="email"
                 />
               </div>
               
               {mode === 'login' && !useMagicLink && (
                 <div>
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password" className="text-sm">Password</Label>
                   <Input
                     id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Your password"
+                    className="h-11 text-base"
+                    autoComplete="current-password"
                   />
                 </div>
               )}
               
               {mode === 'signup' && (
                 <div>
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password" className="text-sm">Password</Label>
                   <Input
                     id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Your password"
+                    className="h-11 text-base"
+                    autoComplete="new-password"
                   />
                 </div>
               )}
@@ -285,17 +302,17 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
                 <Button 
                   onClick={handleMagicLink} 
                   disabled={loading} 
-                  className="w-full"
+                  className="w-full h-11"
                 >
-                  Send Magic Link
+                  {loading ? "Sending..." : "Send Magic Link"}
                 </Button>
               ) : (
                 <Button 
                   onClick={mode === 'login' ? handleLogin : handleSignup} 
                   disabled={loading} 
-                  className="w-full"
+                  className="w-full h-11"
                 >
-                  {mode === 'login' ? 'Sign In' : 'Create Account'}
+                  {loading ? "Loading..." : mode === 'login' ? 'Sign In' : 'Create Account'}
                 </Button>
               )}
               
@@ -303,7 +320,7 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
                 <button
                   type="button"
                   onClick={() => setUseMagicLink(!useMagicLink)}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors mx-auto block"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors mx-auto block min-h-[44px] flex items-center justify-center"
                 >
                   {useMagicLink ? 'Use password instead' : 'Email me a magic link'}
                 </button>
