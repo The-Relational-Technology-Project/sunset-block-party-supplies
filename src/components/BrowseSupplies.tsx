@@ -5,11 +5,14 @@ import { SupplyCard } from "./SupplyCard";
 import { ContactModal } from "./ContactModal";
 import { Supply } from "@/types/supply";
 import { useSupplies } from "@/hooks/useSupplies";
-import { Loader2 } from "lucide-react";
+import { Loader2, SlidersHorizontal } from "lucide-react";
 import { CategorySidebar } from "./CategorySidebar";
 import { categories } from "@/data/categories";
 import { QuickBatchGenerate } from "./steward/QuickBatchGenerate";
 import { supabase } from "@/integrations/supabase/client";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export function BrowseSupplies() {
   const { supplies, loading } = useSupplies();
@@ -54,15 +57,116 @@ export function BrowseSupplies() {
 
   return (
     <div className="min-h-screen flex">
-      <CategorySidebar 
-        selectedCategory={categoryFilter}
-        onCategoryChange={setCategoryFilter}
-      />
+      {/* Desktop Sidebar - hidden on mobile */}
+      <div className="hidden md:block">
+        <CategorySidebar 
+          selectedCategory={categoryFilter}
+          onCategoryChange={setCategoryFilter}
+        />
+      </div>
       
       <div className="flex-1 overflow-auto bg-sand/30">
-        <div className="container mx-auto px-6 py-8">
-          {/* Filters */}
-          <div className="bg-white border border-border rounded-sm p-3 mb-6 shadow-sm">
+        <div className="container mx-auto px-4 md:px-6 py-4 md:py-8">
+          {/* Mobile Category & Filter Buttons */}
+          <div className="md:hidden flex gap-2 mb-4">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="flex-1 bg-white">
+                  <SlidersHorizontal className="h-4 w-4 mr-2" />
+                  Categories
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-64 bg-sand p-0">
+                <SheetHeader className="p-4 pb-2">
+                  <SheetTitle className="text-sm">Choose a Category</SheetTitle>
+                </SheetHeader>
+                <div className="p-4 pt-2">
+                  <nav className="space-y-1">
+                    <button
+                      onClick={() => setCategoryFilter("all")}
+                      className={cn(
+                        "w-full text-left px-3 py-2 text-sm transition-colors rounded-sm",
+                        categoryFilter === "all" || !categoryFilter
+                          ? "bg-terracotta/10 text-terracotta font-medium"
+                          : "text-foreground hover:bg-muted"
+                      )}
+                    >
+                      All Categories
+                    </button>
+                    {categories.map((category) => {
+                      const Icon = category.icon;
+                      return (
+                        <button
+                          key={category.id}
+                          onClick={() => setCategoryFilter(category.id)}
+                          className={cn(
+                            "w-full text-left px-3 py-2 text-sm transition-colors rounded-sm flex items-center gap-2",
+                            categoryFilter === category.id
+                              ? "bg-terracotta/10 text-terracotta font-medium"
+                              : "text-foreground hover:bg-muted"
+                          )}
+                        >
+                          <Icon className="h-4 w-4" />
+                          {category.name}
+                        </button>
+                      );
+                    })}
+                  </nav>
+                </div>
+              </SheetContent>
+            </Sheet>
+
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="flex-1 bg-white">
+                  <SlidersHorizontal className="h-4 w-4 mr-2" />
+                  Filters
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-72">
+                <SheetHeader>
+                  <SheetTitle>Filters</SheetTitle>
+                </SheetHeader>
+                <div className="space-y-6 mt-6">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      Condition
+                    </label>
+                    <Select value={conditionFilter} onValueChange={setConditionFilter}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Any" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Any</SelectItem>
+                        <SelectItem value="excellent">Excellent</SelectItem>
+                        <SelectItem value="good">Good</SelectItem>
+                        <SelectItem value="fair">Fair</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      Availability
+                    </label>
+                    <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Any" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Any</SelectItem>
+                        <SelectItem value="available">Available</SelectItem>
+                        <SelectItem value="unavailable">Unavailable</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+
+          {/* Desktop Filters */}
+          <div className="hidden md:block bg-white border border-border rounded-sm p-3 mb-6 shadow-sm">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <label className="text-xs font-medium text-muted-foreground">
@@ -111,7 +215,7 @@ export function BrowseSupplies() {
               <p className="text-lg text-muted-foreground">No supplies found matching your criteria.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {filteredSupplies.map((supply) => (
                 <SupplyCard
                   key={supply.id}
