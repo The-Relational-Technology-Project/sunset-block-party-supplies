@@ -12,6 +12,40 @@ serve(async (req) => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Authentication required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Create client with user's JWT to verify they're a steward
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: { Authorization: authHeader }
+        },
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    );
+
+    // Get the authenticated user
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid authentication token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Create admin client
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -23,6 +57,17 @@ serve(async (req) => {
         }
       }
     );
+
+    // Verify the user is a steward using the admin client
+    const { data: isSteward, error: stewardError } = await supabaseAdmin
+      .rpc('is_user_steward', { user_id: user.id });
+
+    if (stewardError || !isSteward) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Only stewards can create user accounts' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Get vouched join requests that don't have corresponding auth users
     const { data: joinRequests, error: joinError } = await supabaseAdmin
