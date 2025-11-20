@@ -17,38 +17,50 @@ export type Database = {
       join_requests: {
         Row: {
           connection_context: string | null
+          cross_streets: string | null
           email: string
           id: string
-          intro: string
+          intro: string | null
           name: string
+          phone_number: string | null
+          referral_source: string | null
           requested_at: string
           reviewed_at: string | null
           reviewed_by: string | null
           status: Database["public"]["Enums"]["join_request_status"]
+          user_id: string | null
           voucher_id: string | null
         }
         Insert: {
           connection_context?: string | null
+          cross_streets?: string | null
           email: string
           id?: string
-          intro: string
+          intro?: string | null
           name: string
+          phone_number?: string | null
+          referral_source?: string | null
           requested_at?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["join_request_status"]
+          user_id?: string | null
           voucher_id?: string | null
         }
         Update: {
           connection_context?: string | null
+          cross_streets?: string | null
           email?: string
           id?: string
-          intro?: string
+          intro?: string | null
           name?: string
+          phone_number?: string | null
+          referral_source?: string | null
           requested_at?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["join_request_status"]
+          user_id?: string | null
           voucher_id?: string | null
         }
         Relationships: [
