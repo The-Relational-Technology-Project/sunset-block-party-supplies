@@ -11,3 +11,6 @@ verify_jwt = true
 
 [functions.batch-generate-illustrations]
 verify_jwt = false
+
+[functions.draft-item-from-image]
+verify_jwt = true
