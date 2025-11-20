@@ -52,10 +52,12 @@ Style requirements:
 - Clear, recognizable silhouette
 - Product-focused perspective
 - Technical drawing aesthetic like McMaster-Carr catalog
+- IMPORTANT: NO TEXT, NO LABELS, NO CAPTIONS within the image itself
+- Only draw the object, do not include any written words or descriptions in the image
 
 Item description: ${supply.description}
 
-Make it simple, iconic, and immediately recognizable.`;
+Make it simple, iconic, and immediately recognizable. The drawing should contain ONLY the visual representation of the item, with absolutely no text or labels anywhere in the image.`;
 
         console.log(`Generating illustration for: ${supply.name}`);
 
