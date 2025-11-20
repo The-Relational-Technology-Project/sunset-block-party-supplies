@@ -37,11 +37,53 @@ export function ContactModal({ supply, isOpen, onClose }: ContactModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!supply || !senderName || !senderContact || !message) {
+    if (!supply || !senderName.trim() || !senderContact.trim() || !message.trim()) {
       toast({
         title: "Missing information",
         description: "Please fill in all fields",
         variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate name length
+    if (senderName.trim().length > 100) {
+      toast({
+        title: "Name too long",
+        description: "Name must be less than 100 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate contact length and format
+    if (senderContact.trim().length > 255) {
+      toast({
+        title: "Contact info too long",
+        description: "Contact information must be less than 255 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate email or phone format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[\d\s\-\+\(\)]{7,20}$/;
+    if (!emailRegex.test(senderContact.trim()) && !phoneRegex.test(senderContact.trim())) {
+      toast({
+        title: "Invalid contact information",
+        description: "Please enter a valid email address or phone number",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate message length
+    if (message.trim().length > 2000) {
+      toast({
+        title: "Message too long",
+        description: "Message must be less than 2000 characters",
+        variant: "destructive",
       });
       return;
     }

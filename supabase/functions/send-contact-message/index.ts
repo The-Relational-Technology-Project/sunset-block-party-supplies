@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -16,15 +17,36 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-interface ContactRequest {
-  supplyId: string;
-  supplyName: string;
-  supplyOwnerId: string;
-  supplyOwnerEmail: string;
-  senderName: string;
-  senderContact: string;
-  message: string;
-}
+// Define validation schema
+const ContactRequestSchema = z.object({
+  senderName: z.string()
+    .trim()
+    .min(1, "Name is required")
+    .max(100, "Name must be less than 100 characters"),
+  senderContact: z.string()
+    .trim()
+    .min(1, "Contact information is required")
+    .max(255, "Contact information must be less than 255 characters")
+    .refine(
+      (val) => {
+        // Check if it's either a valid email or a phone number
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const phoneRegex = /^[\d\s\-\+\(\)]{7,20}$/;
+        return emailRegex.test(val) || phoneRegex.test(val);
+      },
+      "Must be a valid email address or phone number"
+    ),
+  message: z.string()
+    .trim()
+    .min(1, "Message is required")
+    .max(2000, "Message must be less than 2000 characters"),
+  supplyId: z.string().uuid("Invalid supply ID"),
+  supplyName: z.string().trim().min(1).max(200),
+  supplyOwnerId: z.string().uuid("Invalid owner ID"),
+  supplyOwnerEmail: z.string().email("Invalid owner email"),
+});
+
+type ContactRequest = z.infer<typeof ContactRequestSchema>;
 
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
@@ -33,28 +55,42 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { supplyId, supplyName, supplyOwnerId, supplyOwnerEmail, senderName, senderContact, message }: ContactRequest = await req.json();
-
-    if (!supplyId || !supplyName || !supplyOwnerId || !supplyOwnerEmail || !senderName || !senderContact || !message) {
+    const rawBody = await req.json();
+    
+    // Validate input data
+    const validationResult = ContactRequestSchema.safeParse(rawBody);
+    
+    if (!validationResult.success) {
+      console.error("Validation error:", validationResult.error.errors);
       return new Response(
-        JSON.stringify({ error: "Missing required fields" }),
-        {
+        JSON.stringify({ 
+          error: "Invalid input data",
+          details: validationResult.error.errors.map(e => ({
+            field: e.path.join('.'),
+            message: e.message
+          }))
+        }),
+        { 
           status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
+          headers: { "Content-Type": "application/json", ...corsHeaders }
         }
       );
     }
+
+    const requestData: ContactRequest = validationResult.data;
+    
+    console.log("Validated contact request for supply:", requestData.supplyName);
 
     // Store the supply request in the database
     const { data: supplyRequest, error: dbError } = await supabase
       .from('supply_requests')
       .insert({
-        supply_id: supplyId,
-        supply_name: supplyName,
-        supply_owner_id: supplyOwnerId,
-        sender_name: senderName,
-        sender_contact: senderContact,
-        message: message,
+        supply_id: requestData.supplyId,
+        supply_name: requestData.supplyName,
+        supply_owner_id: requestData.supplyOwnerId,
+        sender_name: requestData.senderName,
+        sender_contact: requestData.senderContact,
+        message: requestData.message,
         status: 'pending'
       })
       .select()
@@ -70,25 +106,25 @@ const handler = async (req: Request): Promise<Response> => {
     // Send email notification to supply owner
     const emailResponse = await resend.emails.send({
       from: "Party Supplies Community <onboarding@resend.dev>",
-      to: [supplyOwnerEmail],
-      subject: `Interest in your supply: ${supplyName}`,
+      to: [requestData.supplyOwnerEmail],
+      subject: `Interest in your supply: ${requestData.supplyName}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #f97316;">Someone is interested in your supply!</h2>
           
           <div style="background: #fff7ed; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0; color: #ea580c;">Supply: ${supplyName}</h3>
+            <h3 style="margin-top: 0; color: #ea580c;">Supply: ${requestData.supplyName}</h3>
           </div>
 
           <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h4 style="margin-top: 0; color: #374151;">Message from ${senderName}:</h4>
-            <p style="line-height: 1.6; color: #6b7280;">${message}</p>
+            <h4 style="margin-top: 0; color: #374151;">Message from ${requestData.senderName}:</h4>
+            <p style="line-height: 1.6; color: #6b7280;">${requestData.message.replace(/\n/g, '<br>')}</p>
           </div>
 
           <div style="background: #fef3f2; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h4 style="margin-top: 0; color: #dc2626;">Contact Information:</h4>
-            <p style="margin: 5px 0; color: #6b7280;"><strong>Name:</strong> ${senderName}</p>
-            <p style="margin: 5px 0; color: #6b7280;"><strong>Contact:</strong> ${senderContact}</p>
+            <p style="margin: 5px 0; color: #6b7280;"><strong>Name:</strong> ${requestData.senderName}</p>
+            <p style="margin: 5px 0; color: #6b7280;"><strong>Contact:</strong> ${requestData.senderContact}</p>
           </div>
 
           <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">

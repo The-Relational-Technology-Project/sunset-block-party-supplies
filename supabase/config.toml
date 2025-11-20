@@ -1,7 +1,7 @@
 project_id = "mbmmfgivhqzhjyneyelu"
 
 [functions.bulk-create-users]
-verify_jwt = false
+verify_jwt = true
 
 [functions.send-contact-message]
 verify_jwt = false

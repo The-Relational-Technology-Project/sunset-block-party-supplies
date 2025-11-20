@@ -234,6 +234,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -255,10 +276,18 @@ export type Database = {
           zip_code: string
         }[]
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_user_steward: { Args: { user_id: string }; Returns: boolean }
       is_user_vouched: { Args: { user_id: string }; Returns: boolean }
     }
     Enums: {
+      app_role: "member" | "steward"
       join_request_status: "pending" | "vouched" | "rejected"
       user_role: "member" | "steward"
     }
@@ -388,6 +417,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["member", "steward"],
       join_request_status: ["pending", "vouched", "rejected"],
       user_role: ["member", "steward"],
     },
