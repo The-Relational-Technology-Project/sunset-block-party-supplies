@@ -93,14 +93,14 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
   };
 
   return (
-    <header className="bg-gradient-to-r from-orange-400 to-orange-500 text-white shadow-lg">
+    <header className="bg-gradient-to-r from-primary to-accent shadow-lg">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2 cursor-pointer" onClick={() => handleTabChange('home')}>
-            <Gift className="h-8 w-8" />
+            <Gift className="h-8 w-8 text-primary-foreground" />
             <div>
-              <h1 className="text-xl md:text-2xl font-bold">Party Supplies</h1>
-              <p className="text-orange-100 text-xs md:text-sm">Teamwork makes the dream work</p>
+              <h1 className="text-xl md:text-2xl font-bold text-primary-foreground">Party Supplies</h1>
+              <p className="text-primary-foreground/80 text-xs md:text-sm">Teamwork makes the dream work</p>
             </div>
           </div>
           
@@ -113,10 +113,10 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
                     key={key} 
                     variant={activeTab === key ? 'secondary' : 'ghost'} 
                     onClick={() => handleTabChange(key)} 
-                    className={`text-white transition-colors ${
+                    className={`transition-colors ${
                       activeTab === key 
-                        ? 'bg-white text-orange-500 hover:bg-gray-100 hover:text-orange-600' 
-                        : 'hover:bg-orange-600 hover:text-white'
+                        ? 'bg-background text-foreground hover:bg-background/90' 
+                        : 'text-primary-foreground hover:bg-primary-foreground/10'
                     }`}
                   >
                     <Icon className="h-4 w-4 mr-2" />
@@ -133,7 +133,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="md:hidden text-white hover:bg-orange-600" 
+            className="md:hidden text-primary-foreground hover:bg-primary-foreground/10" 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -142,7 +142,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
 
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
-          <nav className="md:hidden mt-4 pb-4 border-t border-orange-300 pt-4">
+          <nav className="md:hidden mt-4 pb-4 border-t border-primary-foreground/20 pt-4">
             <div className="flex flex-col space-y-2">
               {user ? (
                 <>
@@ -151,17 +151,17 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
                       key={key} 
                       variant={activeTab === key ? 'secondary' : 'ghost'} 
                       onClick={() => handleTabChange(key)} 
-                      className={`w-full justify-start text-white transition-colors ${
+                      className={`w-full justify-start transition-colors ${
                         activeTab === key 
-                          ? 'bg-white text-orange-500 hover:bg-gray-100 hover:text-orange-600' 
-                          : 'hover:bg-orange-600 hover:text-white'
+                          ? 'bg-background text-foreground hover:bg-background/90' 
+                          : 'text-primary-foreground hover:bg-primary-foreground/10'
                       }`}
                     >
                       <Icon className="h-4 w-4 mr-2" />
                       {label}
                     </Button>
                   ))}
-                  <div className="pt-2 border-t border-orange-300 mt-2">
+                  <div className="pt-2 border-t border-primary-foreground/20 mt-2">
                     <UserProfile />
                   </div>
                 </>

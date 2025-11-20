@@ -63,11 +63,11 @@ export function UserProfile() {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-orange-600">
+          <Button variant="ghost" className="flex items-center gap-2 text-primary-foreground hover:bg-primary-foreground/10">
             <User className="h-4 w-4" />
             <span className="hidden sm:inline">{profile.name}</span>
-            {isSteward && <Shield className="h-4 w-4 text-yellow-200" />}
-            {isVouched && <Heart className="h-4 w-4 text-pink-200" />}
+            {isSteward && <Shield className="h-4 w-4 text-accent" />}
+            {isVouched && <Heart className="h-4 w-4 text-accent" />}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
@@ -75,8 +75,8 @@ export function UserProfile() {
             <div className="font-medium">{profile.name}</div>
             <div className="text-muted-foreground">{profile.email}</div>
             <div className="text-xs mt-1 flex gap-2">
-              {isSteward && <span className="text-yellow-600">Steward</span>}
-              {isVouched && <span className="text-green-600">Vouched</span>}
+              {isSteward && <span className="text-accent">Steward</span>}
+              {isVouched && <span className="text-primary">Vouched</span>}
             </div>
           </div>
           <DropdownMenuSeparator />
