@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.draft-item-from-image]
 verify_jwt = true
+
+[functions.get-app-icon]
+verify_jwt = false
