@@ -8,7 +8,6 @@ import { useSupplies } from "@/hooks/useSupplies";
 import { Loader2, SlidersHorizontal } from "lucide-react";
 import { CategorySidebar } from "./CategorySidebar";
 import { categories } from "@/data/categories";
-import { QuickBatchGenerate } from "./steward/QuickBatchGenerate";
 import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -20,18 +19,6 @@ export function BrowseSupplies() {
   const [conditionFilter, setConditionFilter] = useState("all");
   const [availabilityFilter, setAvailabilityFilter] = useState("all");
   const [selectedSupply, setSelectedSupply] = useState<Supply | null>(null);
-  const [isSteward, setIsSteward] = useState(false);
-
-  useEffect(() => {
-    const checkSteward = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase.rpc('is_user_steward', { user_id: user.id });
-        setIsSteward(data || false);
-      }
-    };
-    checkSteward();
-  }, []);
 
   const filteredSupplies = useMemo(() => {
     return supplies.filter((supply) => {
@@ -200,12 +187,6 @@ export function BrowseSupplies() {
                   </SelectContent>
                 </Select>
               </div>
-              
-              {isSteward && (
-                <div className="ml-auto">
-                  <QuickBatchGenerate />
-                </div>
-              )}
             </div>
           </div>
 
