@@ -24,6 +24,7 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
   const [captchaAnswer, setCaptchaAnswer] = useState("");
   const [captchaQuestion, setCaptchaQuestion] = useState({ question: "", answer: 0 });
   const [loading, setLoading] = useState(false);
+  const [useMagicLink, setUseMagicLink] = useState(false);
   const { toast } = useToast();
 
   // Generate math captcha when component mounts or mode changes to signup
@@ -46,6 +47,29 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
       toast({ title: "Login failed", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Welcome back!", description: "You've successfully logged in." });
+      onClose();
+    }
+    setLoading(false);
+  };
+
+  const handleMagicLink = async () => {
+    setLoading(true);
+    const redirectUrl = `${window.location.origin}/`;
+    
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: redirectUrl
+      }
+    });
+    
+    if (error) {
+      toast({ title: "Failed to send magic link", description: error.message, variant: "destructive" });
+    } else {
+      toast({ 
+        title: "Check your email!", 
+        description: "We've sent you a magic link to sign in." 
+      });
       onClose();
     }
     setLoading(false);
@@ -230,23 +254,60 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
                   placeholder="your@email.com"
                 />
               </div>
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Your password"
-                />
-              </div>
-              <Button 
-                onClick={mode === 'login' ? handleLogin : handleSignup} 
-                disabled={loading} 
-                className="w-full"
-              >
-                {mode === 'login' ? 'Sign In' : 'Create Account'}
-              </Button>
+              
+              {mode === 'login' && !useMagicLink && (
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Your password"
+                  />
+                </div>
+              )}
+              
+              {mode === 'signup' && (
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Your password"
+                  />
+                </div>
+              )}
+              
+              {mode === 'login' && useMagicLink ? (
+                <Button 
+                  onClick={handleMagicLink} 
+                  disabled={loading} 
+                  className="w-full"
+                >
+                  Send Magic Link
+                </Button>
+              ) : (
+                <Button 
+                  onClick={mode === 'login' ? handleLogin : handleSignup} 
+                  disabled={loading} 
+                  className="w-full"
+                >
+                  {mode === 'login' ? 'Sign In' : 'Create Account'}
+                </Button>
+              )}
+              
+              {mode === 'login' && (
+                <button
+                  type="button"
+                  onClick={() => setUseMagicLink(!useMagicLink)}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors mx-auto block"
+                >
+                  {useMagicLink ? 'Use password instead' : 'Email me a magic link'}
+                </button>
+              )}
             </>
           )}
         </div>
