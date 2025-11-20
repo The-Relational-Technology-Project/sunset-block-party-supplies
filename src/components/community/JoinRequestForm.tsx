@@ -1,50 +1,123 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export function JoinRequestForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [intro, setIntro] = useState("");
-  const [connectionContext, setConnectionContext] = useState("");
+  const [password, setPassword] = useState("");
+  const [crossStreets, setCrossStreets] = useState("");
+  const [referralSource, setReferralSource] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [captchaAnswer, setCaptchaAnswer] = useState("");
+  const [captchaQuestion, setCaptchaQuestion] = useState({ question: "", answer: 0 });
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  // Generate math captcha when component mounts
+  useEffect(() => {
+    const num1 = Math.floor(Math.random() * 10) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
+    setCaptchaQuestion({
+      question: `${num1} + ${num2}`,
+      answer: num1 + num2
+    });
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate captcha
+    if (parseInt(captchaAnswer) !== captchaQuestion.answer) {
+      toast({
+        title: "Incorrect answer",
+        description: "Please solve the math problem correctly.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
 
-    const { error } = await supabase
-      .from('join_requests')
-      .insert({
-        name,
+    try {
+      // Create auth user with password
+      const redirectUrl = `${window.location.origin}/`;
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
-        intro,
-        connection_context: connectionContext
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            name
+          }
+        }
       });
 
-    if (error) {
-      toast({ 
-        title: "Error", 
-        description: error.message, 
-        variant: "destructive" 
+      if (authError) {
+        toast({ 
+          title: "Signup failed", 
+          description: authError.message, 
+          variant: "destructive" 
+        });
+        setLoading(false);
+        return;
+      }
+
+      if (!authData.user) {
+        toast({ 
+          title: "Signup failed", 
+          description: "Failed to create user account.", 
+          variant: "destructive" 
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Create join request linked to the user
+      const { error: requestError } = await supabase
+        .from('join_requests')
+        .insert({
+          user_id: authData.user.id,
+          name,
+          email,
+          cross_streets: crossStreets,
+          referral_source: referralSource,
+          phone_number: referralSource === 'other' ? phoneNumber : null
+        });
+
+      if (requestError) {
+        toast({ 
+          title: "Error", 
+          description: requestError.message, 
+          variant: "destructive" 
+        });
+      } else {
+        toast({ 
+          title: "Request submitted!", 
+          description: "A community steward will review your application. Check your email to verify your account." 
+        });
+        setName("");
+        setEmail("");
+        setPassword("");
+        setCrossStreets("");
+        setReferralSource("");
+        setPhoneNumber("");
+        setCaptchaAnswer("");
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive"
       });
-    } else {
-      toast({ 
-        title: "Request submitted!", 
-        description: "A community steward will review your application." 
-      });
-      setName("");
-      setEmail("");
-      setIntro("");
-      setConnectionContext("");
     }
+
     setLoading(false);
   };
 
@@ -54,7 +127,7 @@ export function JoinRequestForm() {
         <CardTitle>Request to Join Our Community</CardTitle>
         <CardDescription>
           We're a trust-based community in the Sunset & Richmond neighborhoods. 
-          Tell us about yourself and we'll have a community steward review your application.
+          Create your account and a community steward will review your application.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -83,30 +156,74 @@ export function JoinRequestForm() {
           </div>
           
           <div>
-            <Label htmlFor="intro">Tell us about yourself</Label>
-            <Textarea
-              id="intro"
-              value={intro}
-              onChange={(e) => setIntro(e.target.value)}
-              placeholder="Share a bit about who you are, what you enjoy, and why you'd like to join our community..."
-              rows={4}
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Create a password"
+              required
+              minLength={6}
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="crossStreets">What are your cross streets?</Label>
+            <Input
+              id="crossStreets"
+              value={crossStreets}
+              onChange={(e) => setCrossStreets(e.target.value)}
+              placeholder="e.g., 25th Ave & Irving St"
               required
             />
           </div>
           
           <div>
-            <Label htmlFor="connection">Connection to our community</Label>
-            <Textarea
-              id="connection"
-              value={connectionContext}
-              onChange={(e) => setConnectionContext(e.target.value)}
-              placeholder="How did you hear about us? Do you know any current members? Any other connections to the Sunset/Richmond area?"
-              rows={3}
+            <Label htmlFor="referralSource">Who told you about Community Supplies?</Label>
+            <Select value={referralSource} onValueChange={setReferralSource} required>
+              <SelectTrigger id="referralSource">
+                <SelectValue placeholder="Select an option" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="community_member">Community member</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {referralSource === 'other' && (
+            <div className="space-y-2">
+              <Label>Are you open to a quick call with one of our stewards?</Label>
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber" className="text-sm text-muted-foreground">
+                  If yes, enter your phone number:
+                </Label>
+                <Input
+                  id="phoneNumber"
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="(555) 123-4567"
+                />
+              </div>
+            </div>
+          )}
+          
+          <div>
+            <Label htmlFor="captcha">What is {captchaQuestion.question}?</Label>
+            <Input
+              id="captcha"
+              type="number"
+              value={captchaAnswer}
+              onChange={(e) => setCaptchaAnswer(e.target.value)}
+              placeholder="Your answer"
+              required
             />
           </div>
           
           <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "Submitting..." : "Submit Request"}
+            {loading ? "Submitting..." : "Submit Request to Join"}
           </Button>
         </form>
       </CardContent>
