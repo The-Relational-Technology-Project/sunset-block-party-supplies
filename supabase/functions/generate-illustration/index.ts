@@ -20,19 +20,8 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    // Create a simple, focused prompt for minimalist line drawing
-    // Extract key terms from item name for simpler illustration
-    const simplifiedName = itemName.toLowerCase().includes('blanket') 
-      ? 'outdoor blanket on grass'
-      : itemName.toLowerCase().includes('table')
-      ? 'folding table'
-      : itemName.toLowerCase().includes('chair')
-      ? 'folding chair'
-      : itemName.toLowerCase().includes('bucket')
-      ? 'utility bucket'
-      : itemName;
-    
-    const prompt = `Create a minimalist black and white line drawing illustration of a ${simplifiedName}. 
+    // Create a detailed prompt for minimalist line drawing
+    const prompt = `Create a minimalist black and white line drawing illustration of: ${itemName}. 
     
 Style requirements:
 - Simple, clean line art similar to technical catalog illustrations
@@ -43,6 +32,8 @@ Style requirements:
 - Technical drawing aesthetic like McMaster-Carr catalog
 - IMPORTANT: NO TEXT, NO LABELS, NO CAPTIONS within the image itself
 - Only draw the object, do not include any written words or descriptions in the image
+
+Item description: ${description}
 
 Make it simple, iconic, and immediately recognizable. The drawing should contain ONLY the visual representation of the item, with absolutely no text or labels anywhere in the image.`;
 
