@@ -60,9 +60,8 @@ serve(async (req) => {
 Analyze the uploaded image and create a draft listing with:
 - name: Short, descriptive name (max 60 chars)
 - description: Helpful description (2-3 sentences, max 200 chars)
-- category: One of: Decorations, Games & Activities, Tableware, Furniture, Costumes, Audio/Visual, Outdoor, Other
+- category: One of: tools, home-diy, art-craft, camping-outdoors, sports, beach-surf, party-events, kitchen, kids, misc
 - condition: One of: excellent, good, fair
-- partyTypes: Array of suitable party types from: Birthday, Baby Shower, Wedding, Anniversary, Holiday, Graduation, Corporate Event, Sports Event, Other
 
 Return ONLY valid JSON with these exact keys, no markdown formatting.`
           },
@@ -110,10 +109,10 @@ Return ONLY valid JSON with these exact keys, no markdown formatting.`
     // Add context from recent item
     const result = {
       ...draftedItem,
-      location: recentItem?.location || '',
+      neighborhood: recentItem?.neighborhood || '',
+      crossStreets: recentItem?.cross_streets || '',
       contactEmail: recentItem?.contact_email || '',
       houseRules: recentItem?.house_rules || [],
-      zipCode: recentItem?.zip_code || '',
     };
 
     console.log('Successfully drafted item:', result);

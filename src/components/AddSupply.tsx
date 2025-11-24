@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, Upload, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { HouseRules } from "@/components/HouseRules";
@@ -29,7 +28,6 @@ export function AddSupply() {
     neighborhood: "",
     crossStreets: "",
     contactEmail: "",
-    partyTypes: [] as string[],
     images: [] as string[],
   });
 
@@ -53,6 +51,17 @@ export function AddSupply() {
       }
     };
     getUserAndProfile();
+
+    // Load saved location data from localStorage
+    const savedNeighborhood = localStorage.getItem('lastNeighborhood');
+    const savedCrossStreets = localStorage.getItem('lastCrossStreets');
+    if (savedNeighborhood || savedCrossStreets) {
+      setFormData(prev => ({
+        ...prev,
+        neighborhood: savedNeighborhood || '',
+        crossStreets: savedCrossStreets || '',
+      }));
+    }
   }, []);
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,15 +103,17 @@ export function AddSupply() {
         }
 
         // Pre-fill form with AI-generated data
+        const savedNeighborhood = localStorage.getItem('lastNeighborhood');
+        const savedCrossStreets = localStorage.getItem('lastCrossStreets');
+        
         setFormData({
           name: data.name || "",
           description: data.description || "",
           category: data.category || "",
           condition: data.condition || "good",
-          neighborhood: data.neighborhood || "",
-          crossStreets: data.crossStreets || "",
+          neighborhood: data.neighborhood || savedNeighborhood || "",
+          crossStreets: data.crossStreets || savedCrossStreets || "",
           contactEmail: data.contactEmail || userProfile?.email || user.email || "",
-          partyTypes: data.partyTypes || [],
           images: [imageDataUrl],
         });
 
@@ -120,14 +131,6 @@ export function AddSupply() {
     }
   };
 
-  const handlePartyTypeChange = (partyType: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      partyTypes: checked 
-        ? [...prev.partyTypes, partyType]
-        : prev.partyTypes.filter(type => type !== partyType)
-    }));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,6 +148,14 @@ export function AddSupply() {
     setIsLoading(true);
     
     try {
+      // Save location data to localStorage for next time
+      if (formData.neighborhood) {
+        localStorage.setItem('lastNeighborhood', formData.neighborhood);
+      }
+      if (formData.crossStreets) {
+        localStorage.setItem('lastCrossStreets', formData.crossStreets);
+      }
+
       // Insert the item
       const { data: insertedData, error } = await supabase
         .from('supplies')
@@ -154,7 +165,6 @@ export function AddSupply() {
             description: formData.description,
             category: formData.category,
             condition: formData.condition || 'good',
-            party_types: formData.partyTypes,
             neighborhood: formData.neighborhood,
             cross_streets: formData.crossStreets,
             contact_email: formData.contactEmail,
@@ -186,16 +196,18 @@ export function AddSupply() {
 
       toast.success("Item added successfully! Generating illustration...");
       
-      // Reset form
+      // Reset form but keep location data
+      const savedNeighborhood = localStorage.getItem('lastNeighborhood') || '';
+      const savedCrossStreets = localStorage.getItem('lastCrossStreets') || '';
+      
       setFormData({
         name: "",
         description: "",
         category: "",
         condition: "good",
-        neighborhood: "",
-        crossStreets: "",
+        neighborhood: savedNeighborhood,
+        crossStreets: savedCrossStreets,
         contactEmail: userProfile?.email || user?.email || "",
-        partyTypes: [],
         images: [],
       });
       setHouseRules([]);
@@ -211,17 +223,6 @@ export function AddSupply() {
     }
   };
 
-  const partyTypeOptions = [
-    "Birthday",
-    "Baby Shower",
-    "Wedding",
-    "Anniversary",
-    "Holiday",
-    "Graduation",
-    "Corporate Event",
-    "Sports Event",
-    "Other"
-  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -428,32 +429,6 @@ export function AddSupply() {
                     required
                   />
                 </div>
-              </div>
-            </div>
-
-            {/* Party Types */}
-            <div className="bg-card border border-border rounded-sm p-6 space-y-6">
-              <h2 className="text-lg font-serif font-semibold text-deep-brown">Suitable For</h2>
-              <p className="text-sm text-muted-foreground -mt-2">
-                Select the types of parties this item is suitable for
-              </p>
-              
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {partyTypeOptions.map(type => (
-                  <div key={type} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={type}
-                      checked={formData.partyTypes.includes(type)}
-                      onCheckedChange={(checked) => handlePartyTypeChange(type, checked as boolean)}
-                    />
-                    <Label 
-                      htmlFor={type} 
-                      className="text-sm font-normal cursor-pointer"
-                    >
-                      {type}
-                    </Label>
-                  </div>
-                ))}
               </div>
             </div>
 
