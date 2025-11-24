@@ -9,12 +9,13 @@ interface SupplyCardProps {
 }
 
 export function SupplyCard({ supply, onViewContact }: SupplyCardProps) {
-  // Show illustration if available, otherwise show photo
-  const displayImage = supply.illustration_url || supply.images?.[0] || supply.image;
-  
   // Get category icon for fallback
   const categoryData = categories.find(c => c.id === supply.category);
   const CategoryIcon = categoryData?.icon;
+  
+  // Check if illustration is still being generated
+  const hasPhotos = supply.images?.length || supply.image;
+  const isGeneratingIllustration = hasPhotos && !supply.illustration_url;
   
   return (
     <Card 
@@ -23,12 +24,18 @@ export function SupplyCard({ supply, onViewContact }: SupplyCardProps) {
     >
       <CardContent className="p-0">
         <div className="relative aspect-square bg-white flex items-center justify-center overflow-hidden border border-border">
-          {displayImage ? (
+          {supply.illustration_url ? (
             <img 
-              src={displayImage} 
+              src={supply.illustration_url} 
               alt={supply.name}
               className="w-full h-full object-contain p-3"
             />
+          ) : isGeneratingIllustration ? (
+            <div className="text-center px-4">
+              <p className="font-serif text-sm text-muted-foreground italic">
+                illustration in progress…
+              </p>
+            </div>
           ) : CategoryIcon ? (
             <CategoryIcon className="h-16 w-16 text-deep-brown/40 stroke-[1.5]" />
           ) : (
