@@ -15,6 +15,8 @@ export interface Supply {
   illustration_url?: string; // AI-generated minimalist illustration
   houseRules?: string[];
   ownerId?: string; // Add owner ID for database operations
+  lentOut?: boolean; // Track if item is currently lent out
+  lenderNotes?: string; // Private notes for the owner
   owner: {
     name: string;
     zipCode: string;

@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Supply } from "@/types/supply";
-import { Edit2, Save, X, Trash2, ArrowLeft } from "lucide-react";
+import { Edit2, Save, X, Trash2, ArrowLeft, FileText } from "lucide-react";
 import { Header } from "@/components/Header";
 import { MultipleImageUpload } from "@/components/MultipleImageUpload";
 
@@ -19,6 +20,9 @@ export default function MySupplies() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Supply>>({});
+  const [notesDialogOpen, setNotesDialogOpen] = useState(false);
+  const [currentNotesSupply, setCurrentNotesSupply] = useState<Supply | null>(null);
+  const [tempNotes, setTempNotes] = useState("");
   const { toast } = useToast();
 
   const fetchMySupplies = async () => {
@@ -49,10 +53,14 @@ export default function MySupplies() {
         partyTypes: item.party_types || [],
         dateAvailable: item.date_available || new Date().toISOString().split('T')[0],
         location: item.location,
+        neighborhood: item.neighborhood,
+        crossStreets: item.cross_streets,
         contactEmail: item.contact_email,
         image: item.image_url,
         images: item.images || (item.image_url ? [item.image_url] : []),
         houseRules: item.house_rules || [],
+        lentOut: item.lent_out || false,
+        lenderNotes: item.lender_notes || '',
         owner: {
           name: item.profiles?.name || 'Unknown',
           zipCode: item.profiles?.zip_code || '00000',
@@ -161,6 +169,65 @@ export default function MySupplies() {
     navigate(`/?tab=${tab}`);
   };
 
+  const handleToggleLentOut = async (supply: Supply) => {
+    try {
+      const { error } = await supabase
+        .from('supplies')
+        .update({ lent_out: !supply.lentOut })
+        .eq('id', supply.id);
+
+      if (error) throw error;
+
+      toast({
+        title: supply.lentOut ? "Item marked as available" : "Item marked as lent out",
+        description: "Status updated successfully."
+      });
+
+      fetchMySupplies();
+    } catch (error: any) {
+      toast({
+        title: "Error updating status",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleOpenNotes = (supply: Supply) => {
+    setCurrentNotesSupply(supply);
+    setTempNotes(supply.lenderNotes || '');
+    setNotesDialogOpen(true);
+  };
+
+  const handleSaveNotes = async () => {
+    if (!currentNotesSupply) return;
+
+    try {
+      const { error } = await supabase
+        .from('supplies')
+        .update({ lender_notes: tempNotes })
+        .eq('id', currentNotesSupply.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Notes saved",
+        description: "Your notes have been saved successfully."
+      });
+
+      setNotesDialogOpen(false);
+      setCurrentNotesSupply(null);
+      setTempNotes('');
+      fetchMySupplies();
+    } catch (error: any) {
+      toast({
+        title: "Error saving notes",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -246,7 +313,9 @@ export default function MySupplies() {
                         <Badge variant={supply.condition === 'excellent' ? 'default' : 'secondary'}>
                           {supply.condition}
                         </Badge>
-                        <Badge variant="outline">available</Badge>
+                        <Badge variant={supply.lentOut ? "destructive" : "outline"}>
+                          {supply.lentOut ? "lent out" : "available"}
+                        </Badge>
                       </div>
                     </div>
                   )}
@@ -312,14 +381,64 @@ export default function MySupplies() {
                         </div>
                       )}
                       
-                      <div className="flex gap-2 pt-4">
-                        <Button variant="outline" onClick={() => handleEdit(supply)} className="flex-1">
-                          <Edit2 className="h-4 w-4 mr-2" />
-                          Edit
-                        </Button>
-                        <Button variant="destructive" onClick={() => handleDelete(supply.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                      {supply.lenderNotes && (
+                        <div className="bg-muted p-3 rounded-sm">
+                          <p className="text-xs font-medium text-muted-foreground mb-1">Your Notes:</p>
+                          <p className="text-sm whitespace-pre-wrap">{supply.lenderNotes}</p>
+                        </div>
+                      )}
+                      
+                      <div className="flex flex-col gap-2 pt-4">
+                        <div className="flex gap-2">
+                          <Button 
+                            variant={supply.lentOut ? "default" : "outline"} 
+                            onClick={() => handleToggleLentOut(supply)} 
+                            className="flex-1"
+                          >
+                            {supply.lentOut ? "Mark as Available" : "Mark as Lent Out"}
+                          </Button>
+                          <Dialog open={notesDialogOpen && currentNotesSupply?.id === supply.id} onOpenChange={(open) => {
+                            if (!open) {
+                              setNotesDialogOpen(false);
+                              setCurrentNotesSupply(null);
+                              setTempNotes('');
+                            }
+                          }}>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" onClick={() => handleOpenNotes(supply)}>
+                                <FileText className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Lender Notes for {supply.name}</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4 py-4">
+                                <p className="text-sm text-muted-foreground">
+                                  Add notes about who you lent this to, expected return date, or any other details for your reference.
+                                </p>
+                                <Textarea
+                                  value={tempNotes}
+                                  onChange={(e) => setTempNotes(e.target.value)}
+                                  placeholder="e.g., Lent to Sarah for her daughter's birthday party on 12/15. Expected return: 12/16"
+                                  rows={6}
+                                />
+                                <Button onClick={handleSaveNotes} className="w-full">
+                                  Save Notes
+                                </Button>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" onClick={() => handleEdit(supply)} className="flex-1">
+                            <Edit2 className="h-4 w-4 mr-2" />
+                            Edit
+                          </Button>
+                          <Button variant="destructive" onClick={() => handleDelete(supply.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   )}
