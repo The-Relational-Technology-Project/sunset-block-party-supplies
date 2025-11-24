@@ -23,6 +23,9 @@ export function BrowseSupplies() {
 
   const filteredSupplies = useMemo(() => {
     return supplies.filter((supply) => {
+      // Don't show items that are currently lent out
+      if (supply.lentOut) return false;
+      
       const matchesCategory = categoryFilter === "all" || supply.category === categoryFilter;
       const matchesCondition = conditionFilter === "all" || supply.condition === conditionFilter;
       const matchesAvailability = availabilityFilter === "all" || 

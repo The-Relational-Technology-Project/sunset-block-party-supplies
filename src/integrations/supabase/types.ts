@@ -141,6 +141,8 @@ export type Database = {
           illustration_url: string | null
           image_url: string | null
           images: string[] | null
+          lender_notes: string | null
+          lent_out: boolean | null
           location: string | null
           name: string
           neighborhood: string | null
@@ -162,6 +164,8 @@ export type Database = {
           illustration_url?: string | null
           image_url?: string | null
           images?: string[] | null
+          lender_notes?: string | null
+          lent_out?: boolean | null
           location?: string | null
           name: string
           neighborhood?: string | null
@@ -183,6 +187,8 @@ export type Database = {
           illustration_url?: string | null
           image_url?: string | null
           images?: string[] | null
+          lender_notes?: string | null
+          lent_out?: boolean | null
           location?: string | null
           name?: string
           neighborhood?: string | null
