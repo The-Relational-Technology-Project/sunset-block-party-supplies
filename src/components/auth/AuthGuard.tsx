@@ -19,33 +19,66 @@ export function AuthGuard({ children, requireVouched = false, requireSteward = f
   const [showJoinForm, setShowJoinForm] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+
     const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      
-      if (user) {
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-        setProfile(data);
+      try {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (!mounted) return;
+        
+        if (userError) {
+          console.error('AuthGuard user error:', userError);
+          setLoading(false);
+          return;
+        }
+        
+        setUser(user);
+        
+        if (user) {
+          const { data, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .maybeSingle();
+          
+          if (!mounted) return;
+          
+          if (profileError) {
+            console.error('AuthGuard profile error:', profileError);
+          } else {
+            setProfile(data);
+          }
+        }
+        
+        if (mounted) setLoading(false);
+      } catch (error) {
+        console.error('AuthGuard error:', error);
+        if (mounted) {
+          setLoading(false);
+        }
       }
-      setLoading(false);
     };
 
-    checkAuth();
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+      
       if (event === 'SIGNED_OUT') {
         setUser(null);
         setProfile(null);
+        setLoading(false);
       } else if (event === 'SIGNED_IN' && session) {
+        setLoading(true);
         checkAuth();
       }
     });
 
-    return () => subscription.unsubscribe();
+    checkAuth();
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   if (loading) {
