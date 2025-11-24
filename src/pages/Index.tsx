@@ -91,13 +91,11 @@ const Index = () => {
 
   return (
     <main className="min-h-screen flex flex-col">
-      <AuthGuard>
-        <CatalogHeader onNavigate={setActiveTab} />
-        <div className="flex-1">
-          {renderContent()}
-        </div>
-        <Footer />
-      </AuthGuard>
+      <CatalogHeader onNavigate={setActiveTab} />
+      <div className="flex-1">
+        {renderContent()}
+      </div>
+      <Footer />
     </main>
   );
 };
