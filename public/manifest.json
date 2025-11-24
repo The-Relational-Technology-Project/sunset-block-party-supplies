@@ -8,13 +8,13 @@
   "theme_color": "#D07B5C",
   "icons": [
     {
-      "src": "https://mbmmfgivhqzhjyneyelu.supabase.co/functions/v1/get-app-icon",
+      "src": "/favicon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://mbmmfgivhqzhjyneyelu.supabase.co/functions/v1/get-app-icon",
+      "src": "/favicon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
