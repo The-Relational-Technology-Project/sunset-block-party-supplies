@@ -7,7 +7,7 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.generate-illustration]
-verify_jwt = true
+verify_jwt = false
 
 [functions.batch-generate-illustrations]
 verify_jwt = false
