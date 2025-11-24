@@ -26,20 +26,44 @@ const Index = () => {
       setSearchParams({});
     }
 
+    let mounted = true;
+
     const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      setLoading(false);
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        
+        if (!mounted) return;
+        
+        if (error) {
+          console.error('Auth error:', error);
+          setUser(null);
+        } else {
+          setUser(user);
+        }
+      } catch (error) {
+        console.error('Failed to check user:', error);
+        if (mounted) setUser(null);
+      } finally {
+        if (mounted) setLoading(false);
+      }
     };
 
-    checkUser();
-
+    // Set up auth listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user || null);
-      setLoading(false);
+      console.log('Auth state changed:', event);
+      if (mounted) {
+        setUser(session?.user || null);
+        setLoading(false);
+      }
     });
 
-    return () => subscription.unsubscribe();
+    // Then check current user
+    checkUser();
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [searchParams, setSearchParams]);
 
   // Show loading state while checking authentication
