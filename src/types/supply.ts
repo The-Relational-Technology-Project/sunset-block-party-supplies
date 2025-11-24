@@ -6,7 +6,9 @@ export interface Supply {
   condition: 'excellent' | 'good' | 'fair';
   partyTypes: string[];
   dateAvailable: string;
-  location?: string;
+  location?: string; // Keep for backward compatibility
+  neighborhood?: string;
+  crossStreets?: string;
   contactEmail?: string;
   image?: string; // Keep for backward compatibility
   images?: string[]; // New multiple images support
