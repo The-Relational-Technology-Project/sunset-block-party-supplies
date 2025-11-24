@@ -133,6 +133,7 @@ export type Database = {
           condition: string
           contact_email: string | null
           created_at: string
+          cross_streets: string | null
           date_available: string | null
           description: string
           house_rules: string[] | null
@@ -142,6 +143,7 @@ export type Database = {
           images: string[] | null
           location: string | null
           name: string
+          neighborhood: string | null
           owner_id: string
           party_types: string[] | null
           updated_at: string
@@ -152,6 +154,7 @@ export type Database = {
           condition: string
           contact_email?: string | null
           created_at?: string
+          cross_streets?: string | null
           date_available?: string | null
           description: string
           house_rules?: string[] | null
@@ -161,6 +164,7 @@ export type Database = {
           images?: string[] | null
           location?: string | null
           name: string
+          neighborhood?: string | null
           owner_id: string
           party_types?: string[] | null
           updated_at?: string
@@ -171,6 +175,7 @@ export type Database = {
           condition?: string
           contact_email?: string | null
           created_at?: string
+          cross_streets?: string | null
           date_available?: string | null
           description?: string
           house_rules?: string[] | null
@@ -180,6 +185,7 @@ export type Database = {
           images?: string[] | null
           location?: string | null
           name?: string
+          neighborhood?: string | null
           owner_id?: string
           party_types?: string[] | null
           updated_at?: string

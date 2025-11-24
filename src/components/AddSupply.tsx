@@ -26,8 +26,8 @@ export function AddSupply() {
     description: "",
     category: "",
     condition: "good" as "excellent" | "good" | "fair",
-    zipCode: "",
-    location: "",
+    neighborhood: "",
+    crossStreets: "",
     contactEmail: "",
     partyTypes: [] as string[],
     images: [] as string[],
@@ -99,8 +99,8 @@ export function AddSupply() {
           description: data.description || "",
           category: data.category || "",
           condition: data.condition || "good",
-          zipCode: data.zipCode || userProfile?.zip_code || "",
-          location: data.location || "",
+          neighborhood: data.neighborhood || "",
+          crossStreets: data.crossStreets || "",
           contactEmail: data.contactEmail || userProfile?.email || user.email || "",
           partyTypes: data.partyTypes || [],
           images: [imageDataUrl],
@@ -155,8 +155,8 @@ export function AddSupply() {
             category: formData.category,
             condition: formData.condition || 'good',
             party_types: formData.partyTypes,
-            zip_code: formData.zipCode,
-            location: formData.location,
+            neighborhood: formData.neighborhood,
+            cross_streets: formData.crossStreets,
             contact_email: formData.contactEmail,
             images: formData.images,
             image_url: formData.images[0] || null,
@@ -192,8 +192,8 @@ export function AddSupply() {
         description: "",
         category: "",
         condition: "good",
-        zipCode: userProfile?.zip_code || "",
-        location: "",
+        neighborhood: "",
+        crossStreets: "",
         contactEmail: userProfile?.email || user?.email || "",
         partyTypes: [],
         images: [],
@@ -389,27 +389,27 @@ export function AddSupply() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label htmlFor="zipCode" className="text-deep-brown font-medium">
-                    ZIP Code
+                  <Label htmlFor="neighborhood" className="text-deep-brown font-medium">
+                    Neighborhood
                   </Label>
                   <Input
-                    id="zipCode"
-                    placeholder="e.g., 10001"
-                    value={formData.zipCode}
-                    onChange={(e) => setFormData(prev => ({ ...prev, zipCode: e.target.value }))}
+                    id="neighborhood"
+                    placeholder="e.g., Upper West Side"
+                    value={formData.neighborhood}
+                    onChange={(e) => setFormData(prev => ({ ...prev, neighborhood: e.target.value }))}
                     className="border-border mt-1"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="location" className="text-deep-brown font-medium">
-                    Neighborhood/Area
+                  <Label htmlFor="crossStreets" className="text-deep-brown font-medium">
+                    Cross Streets
                   </Label>
                   <Input
-                    id="location"
-                    placeholder="e.g., Upper West Side"
-                    value={formData.location}
-                    onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                    id="crossStreets"
+                    placeholder="e.g., 5th Ave & Main St"
+                    value={formData.crossStreets}
+                    onChange={(e) => setFormData(prev => ({ ...prev, crossStreets: e.target.value }))}
                     className="border-border mt-1"
                   />
                 </div>
