@@ -23,16 +23,17 @@ export function AuthGuard({ children, requireVouched = false, requireSteward = f
 
     const checkAuth = async () => {
       try {
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (!mounted) return;
         
-        if (userError) {
-          console.error('AuthGuard user error:', userError);
+        if (sessionError) {
+          console.error('AuthGuard session error:', sessionError);
           setLoading(false);
           return;
         }
         
+        const user = session?.user ?? null;
         setUser(user);
         
         if (user) {

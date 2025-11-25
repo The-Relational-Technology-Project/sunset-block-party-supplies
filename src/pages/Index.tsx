@@ -30,7 +30,7 @@ const Index = () => {
 
     const checkUser = async () => {
       try {
-        const { data: { user }, error } = await supabase.auth.getUser();
+        const { data: { session }, error } = await supabase.auth.getSession();
         
         if (!mounted) return;
         
@@ -38,7 +38,7 @@ const Index = () => {
           console.error('Auth error:', error);
           setUser(null);
         } else {
-          setUser(user);
+          setUser(session?.user ?? null);
         }
       } catch (error) {
         console.error('Failed to check user:', error);
