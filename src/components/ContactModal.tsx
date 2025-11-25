@@ -212,12 +212,14 @@ export function ContactModal({ supply, isOpen, onClose }: ContactModalProps) {
               </div>
               
               <div className="space-y-2 pt-2 border-t border-border">
-                <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="h-4 w-4 text-terracotta" />
-                  <span className="text-muted-foreground">
-                    {supply.location || supply.owner.zipCode}
-                  </span>
-                </div>
+                {(supply.neighborhood || supply.crossStreets) && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <MapPin className="h-4 w-4 text-terracotta" />
+                    <span className="text-muted-foreground">
+                      {[supply.neighborhood, supply.crossStreets].filter(Boolean).join(' • ')}
+                    </span>
+                  </div>
+                )}
                 
                 {supply.dateAvailable && (
                   <div className="flex items-center gap-2 text-sm">
@@ -246,12 +248,6 @@ export function ContactModal({ supply, isOpen, onClose }: ContactModalProps) {
           </div>
 
           <div className="space-y-4">
-            <div className="bg-sand/20 border border-sand rounded-sm p-4">
-              <h3 className="text-sm font-medium text-deep-brown mb-1">Owner</h3>
-              <p className="text-base text-deep-brown">{supply.owner.name}</p>
-              <p className="text-sm text-muted-foreground">{supply.owner.zipCode}</p>
-            </div>
-
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="senderName" className="text-deep-brown font-medium">
