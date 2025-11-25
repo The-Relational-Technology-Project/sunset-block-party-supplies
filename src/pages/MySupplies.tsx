@@ -11,7 +11,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Supply } from "@/types/supply";
 import { Edit2, Save, X, Trash2, ArrowLeft, FileText } from "lucide-react";
-import { Header } from "@/components/Header";
+import { CatalogHeader } from "@/components/CatalogHeader";
+import { Footer } from "@/components/Footer";
+import { GenerateIllustrationButton } from "@/components/GenerateIllustrationButton";
 import { MultipleImageUpload } from "@/components/MultipleImageUpload";
 
 export default function MySupplies() {
@@ -230,18 +232,19 @@ export default function MySupplies() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header activeTab="" onTabChange={handleTabChange} />
+      <div className="min-h-screen bg-background flex flex-col">
+        <CatalogHeader onNavigate={handleTabChange} />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Loading your supplies...</div>
         </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header activeTab="" onTabChange={handleTabChange} />
+    <div className="min-h-screen bg-background flex flex-col">
+      <CatalogHeader onNavigate={handleTabChange} />
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center gap-4 mb-6">
           <Button variant="ghost" onClick={handleGoBack} className="flex items-center gap-2">
@@ -317,6 +320,19 @@ export default function MySupplies() {
                           {supply.lentOut ? "lent out" : "available"}
                         </Badge>
                       </div>
+                    </div>
+                  )}
+                  
+                  {/* Show generate illustration button if item has photos but no illustration */}
+                  {!editingId && (supply.images?.length || supply.image) && !supply.illustration_url && (
+                    <div className="mt-2">
+                      <GenerateIllustrationButton
+                        supplyId={supply.id}
+                        itemName={supply.name}
+                        description={supply.description}
+                        imageUrl={supply.image}
+                        onGenerated={fetchMySupplies}
+                      />
                     </div>
                   )}
                 </CardHeader>
@@ -448,6 +464,7 @@ export default function MySupplies() {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }
