@@ -50,8 +50,8 @@ export function SupplyCard({ supply, onViewContact }: SupplyCardProps) {
           
           <div className="flex items-center text-xs text-muted-foreground">
             <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
-            <span className="truncate" title={supply.location || `${supply.owner.zipCode} area`}>
-              {supply.location || `${supply.owner.zipCode} area`}
+            <span className="truncate" title={supply.neighborhood || supply.location || `${supply.owner.zipCode} area`}>
+              {supply.neighborhood || supply.location || `${supply.owner.zipCode} area`}
             </span>
           </div>
         </div>
