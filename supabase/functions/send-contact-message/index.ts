@@ -104,34 +104,40 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Supply request saved:", supplyRequest);
 
     // Send email notification to supply owner
+    // Check if sender contact is an email for reply-to
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isEmailContact = emailRegex.test(requestData.senderContact);
+    
     const emailResponse = await resend.emails.send({
-      from: "Party Supplies Community <onboarding@resend.dev>",
+      from: "Community Supplies <notifications@communitysupplies.org>",
       to: [requestData.supplyOwnerEmail],
-      subject: `Interest in your supply: ${requestData.supplyName}`,
+      reply_to: isEmailContact ? requestData.senderContact : undefined,
+      subject: `Someone wants to borrow: ${requestData.supplyName}`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #f97316;">Someone is interested in your supply!</h2>
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; color: #4a3728;">
+          <h2 style="color: #c17c4a; margin-bottom: 24px;">Someone is interested in borrowing your item!</h2>
           
-          <div style="background: #fff7ed; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0; color: #ea580c;">Supply: ${requestData.supplyName}</h3>
+          <div style="background: #f5ebe1; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #c17c4a;">
+            <h3 style="margin-top: 0; color: #4a3728; font-size: 18px;">Item: ${requestData.supplyName}</h3>
           </div>
 
-          <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h4 style="margin-top: 0; color: #374151;">Message from ${requestData.senderName}:</h4>
-            <p style="line-height: 1.6; color: #6b7280;">${requestData.message.replace(/\n/g, '<br>')}</p>
+          <div style="background: #ffffff; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e5d4c1;">
+            <h4 style="margin-top: 0; color: #4a3728; font-size: 16px;">Message from ${requestData.senderName}:</h4>
+            <p style="line-height: 1.6; color: #6b5a4a; margin: 12px 0;">${requestData.message.replace(/\n/g, '<br>')}</p>
           </div>
 
-          <div style="background: #fef3f2; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h4 style="margin-top: 0; color: #dc2626;">Contact Information:</h4>
-            <p style="margin: 5px 0; color: #6b7280;"><strong>Name:</strong> ${requestData.senderName}</p>
-            <p style="margin: 5px 0; color: #6b7280;"><strong>Contact:</strong> ${requestData.senderContact}</p>
+          <div style="background: #fff9f5; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e5d4c1;">
+            <h4 style="margin-top: 0; color: #4a3728; font-size: 16px;">Contact Information:</h4>
+            <p style="margin: 8px 0; color: #6b5a4a;"><strong>Name:</strong> ${requestData.senderName}</p>
+            <p style="margin: 8px 0; color: #6b5a4a;"><strong>Contact:</strong> ${requestData.senderContact}</p>
+            ${isEmailContact ? '<p style="margin: 12px 0 0 0; color: #8b7355; font-size: 14px;"><em>You can reply directly to this email to respond.</em></p>' : ''}
           </div>
 
-          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+          <hr style="border: none; border-top: 1px solid #e5d4c1; margin: 30px 0;">
           
-          <p style="color: #6b7280; font-size: 14px;">
-            This message was sent through the Party Supplies Community platform. 
-            Please reply directly to coordinate sharing your supply.
+          <p style="color: #8b7355; font-size: 14px; line-height: 1.5;">
+            This message was sent through Community Supplies, a neighborhood sharing platform. 
+            ${isEmailContact ? 'Reply directly to this email' : 'Please reach out using the contact information above'} to coordinate sharing your item.
           </p>
         </div>
       `,
