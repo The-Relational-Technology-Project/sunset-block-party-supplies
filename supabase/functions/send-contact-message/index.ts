@@ -103,11 +103,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Supply request saved:", supplyRequest);
 
-    // Send email notification to supply owner
-    // Check if sender contact is an email for reply-to
+    // Check if sender contact is an email for reply-to and confirmation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isEmailContact = emailRegex.test(requestData.senderContact);
     
+    // Send email notification to supply owner
     const emailResponse = await resend.emails.send({
       from: "Community Supplies <notifications@communitysupplies.org>",
       to: [requestData.supplyOwnerEmail],
@@ -143,7 +143,49 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Contact email sent successfully:", emailResponse);
+    console.log("Owner notification email sent successfully:", emailResponse);
+
+    // Send confirmation email to requester if they provided an email
+    if (isEmailContact) {
+      const confirmationResponse = await resend.emails.send({
+        from: "Community Supplies <notifications@communitysupplies.org>",
+        to: [requestData.senderContact],
+        subject: `Your request for "${requestData.supplyName}" has been sent`,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; color: #4a3728;">
+            <h2 style="color: #c17c4a; margin-bottom: 24px;">Your request has been submitted!</h2>
+            
+            <p style="color: #6b5a4a; line-height: 1.6; margin: 16px 0;">
+              Hi ${requestData.senderName},
+            </p>
+            
+            <p style="color: #6b5a4a; line-height: 1.6; margin: 16px 0;">
+              We've successfully sent your request to the owner of <strong>${requestData.supplyName}</strong>. They'll receive your message and contact information, and should reach out to you directly to coordinate.
+            </p>
+
+            <div style="background: #f5ebe1; padding: 20px; border-radius: 8px; margin: 24px 0; border-left: 4px solid #c17c4a;">
+              <h3 style="margin-top: 0; color: #4a3728; font-size: 16px;">Your Message:</h3>
+              <p style="line-height: 1.6; color: #6b5a4a; margin: 8px 0;">${requestData.message.replace(/\n/g, '<br>')}</p>
+            </div>
+
+            <div style="background: #fff9f5; padding: 20px; border-radius: 8px; margin: 24px 0; border: 1px solid #e5d4c1;">
+              <h4 style="margin-top: 0; color: #4a3728; font-size: 16px;">What happens next?</h4>
+              <p style="color: #6b5a4a; line-height: 1.6; margin: 8px 0;">
+                The item owner will contact you directly using the contact information you provided. Please keep an eye on your email and respond promptly when they reach out.
+              </p>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #e5d4c1; margin: 30px 0;">
+            
+            <p style="color: #8b7355; font-size: 14px; line-height: 1.5;">
+              Thank you for using Community Supplies to share resources within your neighborhood!
+            </p>
+          </div>
+        `,
+      });
+
+      console.log("Requester confirmation email sent successfully:", confirmationResponse);
+    }
 
     return new Response(JSON.stringify({ 
       success: true, 
