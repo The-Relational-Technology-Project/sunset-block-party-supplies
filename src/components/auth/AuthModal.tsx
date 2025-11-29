@@ -105,20 +105,10 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
       return;
     }
     
-    // Check if email confirmation is required
-    const needsConfirmation = data.user && !data.session;
-    
-    if (needsConfirmation) {
-      toast({ 
-        title: "Check your email", 
-        description: "We've sent you a confirmation link to complete your signup." 
-      });
-    } else {
-      toast({ 
-        title: "Welcome!", 
-        description: "Your account has been created successfully." 
-      });
-    }
+    toast({ 
+      title: "Request received!", 
+      description: "We've received your request to join. You'll receive an email once your request is approved." 
+    });
     
     onClose();
     setLoading(false);
