@@ -21,6 +21,8 @@ interface Member {
   role: 'member' | 'steward';
   vouched_at: string | null;
   created_at: string;
+  intro_text: string | null;
+  zip_code: string | null;
 }
 
 export function CommunityOverview() {
@@ -38,7 +40,7 @@ export function CommunityOverview() {
     try {
       const { data: members, error } = await supabase
         .from('profiles')
-        .select('id, name, email, role, vouched_at, created_at')
+        .select('id, name, email, role, vouched_at, created_at, intro_text, zip_code')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -138,8 +140,9 @@ export function CommunityOverview() {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
+                <TableHead>Connection</TableHead>
+                <TableHead>Zip</TableHead>
                 <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead>Joined</TableHead>
               </TableRow>
             </TableHeader>
@@ -147,29 +150,18 @@ export function CommunityOverview() {
               {recentMembers.map((member) => (
                 <TableRow key={member.id}>
                   <TableCell className="font-medium">{member.name}</TableCell>
-                  <TableCell>{member.email}</TableCell>
+                  <TableCell className="text-sm">{member.email}</TableCell>
+                  <TableCell className="max-w-xs truncate text-sm text-muted-foreground">
+                    {member.intro_text || '—'}
+                  </TableCell>
+                  <TableCell className="text-sm">{member.zip_code || '—'}</TableCell>
                   <TableCell>
                     <Badge variant={member.role === 'steward' ? 'default' : 'secondary'}>
                       {member.role === 'steward' && <Shield className="h-3 w-3 mr-1" />}
                       {member.role}
                     </Badge>
                   </TableCell>
-                  <TableCell>
-                    <Badge variant={member.vouched_at ? 'default' : 'outline'}>
-                      {member.vouched_at ? (
-                        <>
-                          <Heart className="h-3 w-3 mr-1" />
-                          Vouched
-                        </>
-                      ) : (
-                        <>
-                          <UserCheck className="h-3 w-3 mr-1" />
-                          Member
-                        </>
-                      )}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
+                  <TableCell className="text-sm">
                     {new Date(member.created_at).toLocaleDateString()}
                   </TableCell>
                 </TableRow>
