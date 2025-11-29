@@ -1,10 +1,10 @@
 
 import { Gift, Search, Plus, Sparkles, Menu, X, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { AuthButtons } from "./auth/AuthButtons";
 import { UserProfile } from "./auth/UserProfile";
-import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface HeaderProps {
@@ -13,9 +13,11 @@ interface HeaderProps {
 }
 
 export function Header({ activeTab, onTabChange }: HeaderProps) {
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [isSteward, setIsSteward] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -31,6 +33,15 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
           .single();
         console.log("Header: User profile:", profile);
         setUserProfile(profile);
+        
+        // Check for steward role
+        const { data: roles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'steward')
+          .single();
+        setIsSteward(!!roles);
       }
     };
 
@@ -53,9 +64,21 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
               console.log("Header: Updated profile:", profile);
               setUserProfile(profile);
             });
+          
+          // Check for steward role
+          supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', currentUser.id)
+            .eq('role', 'steward')
+            .single()
+            .then(({ data: roles }) => {
+              setIsSteward(!!roles);
+            });
         }, 0);
       } else {
         setUserProfile(null);
+        setIsSteward(false);
       }
     });
 
@@ -76,18 +99,12 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
     icon: Sparkles
   }];
 
-  // Add steward dashboard for stewards
-  console.log("Header: Checking steward status:", userProfile?.role);
-  if (userProfile?.role === 'steward') {
-    console.log("Header: Adding steward dashboard to navigation");
-    navigationItems.push({
-      key: 'steward',
-      label: 'Steward Dashboard',
-      icon: Shield
-    });
-  }
-
   const handleTabChange = (tab: string) => {
+    if (tab === 'steward') {
+      navigate('/steward');
+      setIsMobileMenuOpen(false);
+      return;
+    }
     onTabChange(tab);
     setIsMobileMenuOpen(false);
   };
@@ -123,6 +140,16 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
                     {label}
                   </Button>
                 ))}
+                {isSteward && (
+                  <Button 
+                    variant="ghost"
+                    onClick={() => handleTabChange('steward')} 
+                    className="text-primary-foreground hover:bg-primary-foreground/10"
+                  >
+                    <Shield className="h-4 w-4 mr-2" />
+                    Steward
+                  </Button>
+                )}
               </nav>
             )}
             
@@ -161,6 +188,16 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
                       {label}
                     </Button>
                   ))}
+                  {isSteward && (
+                    <Button 
+                      variant="ghost"
+                      onClick={() => handleTabChange('steward')} 
+                      className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+                    >
+                      <Shield className="h-4 w-4 mr-2" />
+                      Steward Dashboard
+                    </Button>
+                  )}
                   <div className="pt-2 border-t border-primary-foreground/20 mt-2">
                     <UserProfile />
                   </div>

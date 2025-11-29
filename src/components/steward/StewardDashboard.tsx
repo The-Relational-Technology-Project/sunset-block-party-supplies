@@ -2,11 +2,12 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Users, Heart, UserCheck, Settings } from "lucide-react";
+import { Shield, Users, Heart, UserCheck, Settings, Package } from "lucide-react";
 import { JoinRequestsManager } from "./JoinRequestsManager";
 import { CommunityOverview } from "./CommunityOverview";
 import { BulkCreateUsers } from "./BulkCreateUsers";
 import { VouchedUsersExport } from "./VouchedUsersExport";
+import { SupplyRequestsManager } from "./SupplyRequestsManager";
 
 export function StewardDashboard() {
   return (
@@ -19,19 +20,23 @@ export function StewardDashboard() {
         </div>
       </div>
 
-      <Tabs defaultValue="vouched-users" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="vouched-users" className="flex items-center gap-2">
-            <UserCheck className="h-4 w-4" />
-            Vouched Users
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="overview" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            New Users
+          </TabsTrigger>
+          <TabsTrigger value="supply-requests" className="flex items-center gap-2">
+            <Package className="h-4 w-4" />
+            Supply Requests
           </TabsTrigger>
           <TabsTrigger value="requests" className="flex items-center gap-2">
             <Heart className="h-4 w-4" />
             Join Requests
           </TabsTrigger>
-          <TabsTrigger value="overview" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Community Overview
+          <TabsTrigger value="vouched-users" className="flex items-center gap-2">
+            <UserCheck className="h-4 w-4" />
+            Vouched Users
           </TabsTrigger>
           <TabsTrigger value="bulk-create" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -39,8 +44,32 @@ export function StewardDashboard() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="vouched-users">
-          <VouchedUsersExport />
+        <TabsContent value="overview">
+          <Card>
+            <CardHeader>
+              <CardTitle>New Users</CardTitle>
+              <CardDescription>
+                View all community members and their join details
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CommunityOverview />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="supply-requests">
+          <Card>
+            <CardHeader>
+              <CardTitle>Supply Requests</CardTitle>
+              <CardDescription>
+                Recent requests from people wanting to borrow supplies
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SupplyRequestsManager />
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="requests">
@@ -57,18 +86,8 @@ export function StewardDashboard() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="overview">
-          <Card>
-            <CardHeader>
-              <CardTitle>Community Overview</CardTitle>
-              <CardDescription>
-                View all community members and their status
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <CommunityOverview />
-            </CardContent>
-          </Card>
+        <TabsContent value="vouched-users">
+          <VouchedUsersExport />
         </TabsContent>
         
         <TabsContent value="bulk-create">
