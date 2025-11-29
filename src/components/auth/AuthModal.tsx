@@ -76,41 +76,68 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
   };
 
   const handleSignup = async () => {
-    setLoading(true);
-    
-    // Bot protection checks
-    if (honeypot.trim() !== "") {
-      toast({ title: "Signup failed", description: "Please try again.", variant: "destructive" });
-      setLoading(false);
-      return;
-    }
-    
-    if (parseInt(captchaAnswer) !== captchaQuestion.answer) {
-      toast({ title: "Incorrect answer", description: "Please solve the math problem correctly.", variant: "destructive" });
-      setLoading(false);
-      return;
-    }
-    
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { 
-        data: { 
-          name,
-          connection_context: connectionContext 
-        },
-        emailRedirectTo: redirectUrl
+    try {
+      setLoading(true);
+      
+      // Bot protection checks
+      if (honeypot.trim() !== "") {
+        toast({ title: "Signup failed", description: "Please try again.", variant: "destructive" });
+        setLoading(false);
+        return;
       }
-    });
-    if (error) {
-      toast({ title: "Signup failed", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Check your email", description: "We've sent you a confirmation link." });
+      
+      if (parseInt(captchaAnswer) !== captchaQuestion.answer) {
+        toast({ title: "Incorrect answer", description: "Please solve the math problem correctly.", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+      
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { 
+          data: { 
+            name,
+            connection_context: connectionContext 
+          },
+          emailRedirectTo: redirectUrl
+        }
+      });
+      
+      if (error) {
+        toast({ title: "Signup failed", description: error.message, variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+      
+      // Check if email confirmation is required
+      const needsConfirmation = data.user && !data.session;
+      
+      if (needsConfirmation) {
+        toast({ 
+          title: "Check your email", 
+          description: "We've sent you a confirmation link to complete your signup." 
+        });
+      } else {
+        toast({ 
+          title: "Welcome!", 
+          description: "Your account has been created successfully." 
+        });
+      }
+      
       onClose();
+      setLoading(false);
+    } catch (error) {
+      console.error('Signup error:', error);
+      toast({ 
+        title: "Signup failed", 
+        description: "An unexpected error occurred. Please try again.", 
+        variant: "destructive" 
+      });
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleJoinRequest = async () => {
