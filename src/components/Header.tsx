@@ -126,7 +126,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
               </nav>
             )}
             
-            {user ? <UserProfile /> : <AuthButtons />}
+            {user ? <UserProfile /> : <AuthButtons onSuccess={() => onTabChange('browse')} />}
           </div>
 
           {/* Mobile Menu Button */}
@@ -167,7 +167,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
                 </>
               ) : (
                 <div className="space-y-2">
-                  <AuthButtons />
+                  <AuthButtons onSuccess={() => handleTabChange('browse')} />
                 </div>
               )}
             </div>

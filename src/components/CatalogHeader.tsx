@@ -81,7 +81,7 @@ export const CatalogHeader = ({ onSearch, searchQuery = "", onNavigate }: Catalo
         </div>
 
         <div className="flex items-center gap-2">
-          {user ? <UserProfile /> : <AuthButtons />}
+          {user ? <UserProfile /> : <AuthButtons onSuccess={() => onNavigate?.('browse')} />}
         </div>
       </div>
     </header>
