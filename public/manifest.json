@@ -4,8 +4,8 @@
   "description": "Borrow what you need. Share what you have. A neighborhood supply library for the Outer Sunset.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F5EDE5",
-  "theme_color": "#D07B5C",
+  "background_color": "#EED3BF",
+  "theme_color": "#C37C67",
   "icons": [
     {
       "src": "/favicon.png",
