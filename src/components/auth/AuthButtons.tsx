@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AuthModal } from "./AuthModal";
 
-export function AuthButtons() {
+export function AuthButtons({ onSuccess }: { onSuccess?: () => void }) {
   const [modalMode, setModalMode] = useState<'login' | 'signup' | 'join-request' | null>(null);
 
   return (
@@ -28,6 +28,7 @@ export function AuthButtons() {
         isOpen={modalMode !== null}
         onClose={() => setModalMode(null)}
         mode={modalMode || 'login'}
+        onSuccess={onSuccess}
       />
     </>
   );

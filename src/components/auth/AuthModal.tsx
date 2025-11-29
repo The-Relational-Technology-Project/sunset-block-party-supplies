@@ -12,9 +12,10 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   mode: 'login' | 'signup' | 'join-request';
+  onSuccess?: () => void;
 }
 
-export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
+export function AuthModal({ isOpen, onClose, mode, onSuccess }: AuthModalProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -106,12 +107,17 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
     }
     
     toast({ 
-      title: "Request received!", 
-      description: "We've received your request to join. You'll receive an email once your request is approved." 
+      title: "Welcome!", 
+      description: "Your account has been created. Let's browse some supplies!" 
     });
     
     onClose();
     setLoading(false);
+    
+    // Navigate to browse screen after successful signup
+    if (onSuccess) {
+      onSuccess();
+    }
   };
 
   const handleJoinRequest = async () => {

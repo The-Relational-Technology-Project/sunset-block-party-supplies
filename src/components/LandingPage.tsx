@@ -136,6 +136,7 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
         isOpen={!!modalMode}
         mode={modalMode}
         onClose={() => setModalMode(null)}
+        onSuccess={() => onTabChange('browse')}
       />
     </div>
   );
