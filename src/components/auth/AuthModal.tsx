@@ -107,17 +107,12 @@ export function AuthModal({ isOpen, onClose, mode, onSuccess }: AuthModalProps) 
     }
     
     toast({ 
-      title: "Welcome!", 
-      description: "Your account has been created. Let's browse some supplies!" 
+      title: "Check your email!", 
+      description: "We've sent you a confirmation link. Click it to access the site." 
     });
     
     onClose();
     setLoading(false);
-    
-    // Navigate to browse screen after successful signup
-    if (onSuccess) {
-      onSuccess();
-    }
   };
 
   const handleJoinRequest = async () => {
