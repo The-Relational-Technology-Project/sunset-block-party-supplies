@@ -78,6 +78,7 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
   const handleSignup = async () => {
     try {
       setLoading(true);
+      console.log('Starting signup process...');
       
       // Bot protection checks
       if (honeypot.trim() !== "") {
@@ -93,8 +94,10 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
       }
       
       const redirectUrl = `${window.location.origin}/`;
+      console.log('Calling Supabase signUp...');
       
-      const { data, error } = await supabase.auth.signUp({
+      // Add timeout to prevent hanging
+      const signupPromise = supabase.auth.signUp({
         email,
         password,
         options: { 
@@ -106,7 +109,16 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
         }
       });
       
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Signup timeout')), 15000)
+      );
+      
+      const { data, error } = await Promise.race([signupPromise, timeoutPromise]) as any;
+      
+      console.log('Signup response:', { data, error });
+      
       if (error) {
+        console.error('Signup error:', error);
         toast({ title: "Signup failed", description: error.message, variant: "destructive" });
         setLoading(false);
         return;
@@ -114,6 +126,7 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
       
       // Check if email confirmation is required
       const needsConfirmation = data.user && !data.session;
+      console.log('Needs confirmation:', needsConfirmation);
       
       if (needsConfirmation) {
         toast({ 
@@ -127,13 +140,14 @@ export function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
         });
       }
       
+      console.log('Signup successful, closing modal');
       onClose();
       setLoading(false);
     } catch (error) {
-      console.error('Signup error:', error);
+      console.error('Signup catch error:', error);
       toast({ 
         title: "Signup failed", 
-        description: "An unexpected error occurred. Please try again.", 
+        description: error instanceof Error ? error.message : "An unexpected error occurred. Please try again.", 
         variant: "destructive" 
       });
       setLoading(false);
