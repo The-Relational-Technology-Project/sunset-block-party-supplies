@@ -194,6 +194,22 @@ export function AddSupply() {
         }
       });
 
+      // Send notification email
+      supabase.functions.invoke('send-supply-notification', {
+        body: {
+          itemName: formData.name,
+          category: formData.category,
+          ownerName: userProfile?.name || user?.email || 'Unknown',
+          ownerEmail: formData.contactEmail,
+          description: formData.description,
+          neighborhood: formData.neighborhood
+        }
+      }).then(({ error: emailError }) => {
+        if (emailError) {
+          console.error('Failed to send notification email:', emailError);
+        }
+      });
+
       toast.success("Item added successfully! Generating illustration...");
       
       // Reset form but keep location data

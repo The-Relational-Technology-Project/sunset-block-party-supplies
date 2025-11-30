@@ -98,6 +98,21 @@ export function JoinRequestForm() {
           variant: "destructive" 
         });
       } else {
+        // Send notification email
+        supabase.functions.invoke('send-join-notification', {
+          body: {
+            name,
+            email,
+            referralSource,
+            crossStreets,
+            phoneNumber: referralSource === 'other' ? phoneNumber : null
+          }
+        }).then(({ error: emailError }) => {
+          if (emailError) {
+            console.error('Failed to send notification email:', emailError);
+          }
+        });
+
         toast({ 
           title: "Request submitted!", 
           description: "A community steward will review your application. Check your email to verify your account." 
