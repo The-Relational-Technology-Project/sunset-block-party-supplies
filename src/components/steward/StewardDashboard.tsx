@@ -1,55 +1,43 @@
-
-import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Users, Heart, UserCheck, Settings, Package } from "lucide-react";
-import { JoinRequestsManager } from "./JoinRequestsManager";
+import { Shield, Users, Package, MessageSquare } from "lucide-react";
 import { CommunityOverview } from "./CommunityOverview";
-import { BulkCreateUsers } from "./BulkCreateUsers";
-import { VouchedUsersExport } from "./VouchedUsersExport";
 import { SupplyRequestsManager } from "./SupplyRequestsManager";
+import { AllSuppliesManager } from "./AllSuppliesManager";
 
 export function StewardDashboard() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
-        <Shield className="h-8 w-8 text-orange-500" />
+        <Shield className="h-8 w-8 text-primary" />
         <div>
           <h1 className="text-3xl font-bold">Steward Dashboard</h1>
-          <p className="text-gray-600">Manage community applications and member vouching</p>
+          <p className="text-muted-foreground">Community overview and activity</p>
         </div>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="overview" className="flex items-center gap-2">
+      <Tabs defaultValue="members" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="members" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            New Users
+            Members
           </TabsTrigger>
-          <TabsTrigger value="supply-requests" className="flex items-center gap-2">
+          <TabsTrigger value="supplies" className="flex items-center gap-2">
             <Package className="h-4 w-4" />
-            Supply Requests
+            Supplies
           </TabsTrigger>
           <TabsTrigger value="requests" className="flex items-center gap-2">
-            <Heart className="h-4 w-4" />
-            Join Requests
-          </TabsTrigger>
-          <TabsTrigger value="vouched-users" className="flex items-center gap-2">
-            <UserCheck className="h-4 w-4" />
-            Vouched Users
-          </TabsTrigger>
-          <TabsTrigger value="bulk-create" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Bulk Create
+            <MessageSquare className="h-4 w-4" />
+            Supply Requests
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview">
+        <TabsContent value="members">
           <Card>
             <CardHeader>
-              <CardTitle>New Users</CardTitle>
+              <CardTitle>All Members</CardTitle>
               <CardDescription>
-                View all community members and their join details
+                View all community members
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -58,7 +46,21 @@ export function StewardDashboard() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="supply-requests">
+        <TabsContent value="supplies">
+          <Card>
+            <CardHeader>
+              <CardTitle>All Supplies</CardTitle>
+              <CardDescription>
+                All supplies shared in the community, newest first
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AllSuppliesManager />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="requests">
           <Card>
             <CardHeader>
               <CardTitle>Supply Requests</CardTitle>
@@ -70,28 +72,6 @@ export function StewardDashboard() {
               <SupplyRequestsManager />
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="requests">
-          <Card>
-            <CardHeader>
-              <CardTitle>Join Requests</CardTitle>
-              <CardDescription>
-                Review and approve applications from people who want to join the community.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <JoinRequestsManager />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="vouched-users">
-          <VouchedUsersExport />
-        </TabsContent>
-        
-        <TabsContent value="bulk-create">
-          <BulkCreateUsers />
         </TabsContent>
       </Tabs>
     </div>
