@@ -12,8 +12,40 @@ serve(async (req) => {
   }
 
   try {
+    // Verify user authentication and vouched status
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid or expired token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check if user is vouched
+    const { data: isVouched } = await supabase.rpc('is_user_vouched', { user_id: user.id });
+    if (!isVouched) {
+      return new Response(
+        JSON.stringify({ error: 'User must be vouched to generate illustrations' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { supplyId, itemName, description, imageUrl } = await req.json();
-    console.log('Generating illustration for:', itemName);
+    console.log('Generating illustration for:', itemName, 'by user:', user.id);
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
@@ -89,10 +121,6 @@ Make it simple, iconic, and immediately recognizable. The drawing should contain
     }
 
     // Update the supply record with the illustration URL
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
     const { error: updateError } = await supabase
       .from('supplies')
       .update({ illustration_url: generatedImage })

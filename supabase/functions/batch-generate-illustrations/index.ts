@@ -22,6 +22,36 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Verify user authentication and steward status (batch operations are steward-only)
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid or expired token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check if user is a steward (batch operations require steward role)
+    const { data: isSteward } = await supabase.rpc('is_user_steward', { user_id: user.id });
+    if (!isSteward) {
+      return new Response(
+        JSON.stringify({ error: 'Only stewards can run batch illustration generation' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Batch illustration generation started by steward:', user.id);
+
     // Fetch all supplies without illustrations
     const { data: supplies, error } = await supabase
       .from('supplies')
