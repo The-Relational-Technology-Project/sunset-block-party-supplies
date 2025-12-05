@@ -272,6 +272,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_join_request_rate_limit: {
+        Args: { request_email: string }
+        Returns: boolean
+      }
       get_public_profile: {
         Args: { profile_id: string }
         Returns: {
