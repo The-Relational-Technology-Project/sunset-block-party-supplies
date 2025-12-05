@@ -116,8 +116,8 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
           <div className="flex items-center space-x-2 cursor-pointer" onClick={() => handleTabChange('home')}>
             <Gift className="h-8 w-8 text-primary-foreground" />
             <div>
-              <h1 className="text-xl md:text-2xl font-bold text-primary-foreground">Party Supplies</h1>
-              <p className="text-primary-foreground/80 text-xs md:text-sm">Teamwork makes the dream work</p>
+              <h1 className="text-xl md:text-2xl font-bold text-primary-foreground">Community Supplies</h1>
+              <p className="text-primary-foreground/80 text-xs md:text-sm">Share what you have, borrow what you need</p>
             </div>
           </div>
           

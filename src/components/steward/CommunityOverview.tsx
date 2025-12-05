@@ -1,15 +1,13 @@
-
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Heart, Shield, UserCheck } from "lucide-react";
+import { Users, Shield, UserPlus } from "lucide-react";
 
 interface CommunityStats {
   totalMembers: number;
-  vouchedMembers: number;
   stewards: number;
   recentJoins: number;
 }
@@ -28,11 +26,10 @@ interface Member {
 export function CommunityOverview() {
   const [stats, setStats] = useState<CommunityStats>({
     totalMembers: 0,
-    vouchedMembers: 0,
     stewards: 0,
     recentJoins: 0
   });
-  const [recentMembers, setRecentMembers] = useState<Member[]>([]);
+  const [allMembers, setAllMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -45,10 +42,9 @@ export function CommunityOverview() {
 
       if (error) throw error;
 
-      const allMembers = members || [];
-      const vouchedCount = allMembers.filter(m => m.vouched_at).length;
-      const stewardCount = allMembers.filter(m => m.role === 'steward').length;
-      const recentCount = allMembers.filter(m => {
+      const memberList = members || [];
+      const stewardCount = memberList.filter(m => m.role === 'steward').length;
+      const recentCount = memberList.filter(m => {
         const joinDate = new Date(m.created_at);
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
@@ -56,13 +52,12 @@ export function CommunityOverview() {
       }).length;
 
       setStats({
-        totalMembers: allMembers.length,
-        vouchedMembers: vouchedCount,
+        totalMembers: memberList.length,
         stewards: stewardCount,
         recentJoins: recentCount
       });
 
-      setRecentMembers(allMembers.slice(0, 10));
+      setAllMembers(memberList);
     } catch (error: any) {
       toast({
         title: "Error loading community data",
@@ -85,7 +80,7 @@ export function CommunityOverview() {
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Members</CardTitle>
@@ -93,16 +88,6 @@ export function CommunityOverview() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalMembers}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Vouched Members</CardTitle>
-            <Heart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.vouchedMembers}</div>
           </CardContent>
         </Card>
 
@@ -119,7 +104,7 @@ export function CommunityOverview() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Recent Joins</CardTitle>
-            <UserCheck className="h-4 w-4 text-muted-foreground" />
+            <UserPlus className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.recentJoins}</div>
@@ -128,48 +113,40 @@ export function CommunityOverview() {
         </Card>
       </div>
 
-      {/* Recent Members Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Members</CardTitle>
-          <CardDescription>Latest members to join the community</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Connection</TableHead>
-                <TableHead>Zip</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Joined</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {recentMembers.map((member) => (
-                <TableRow key={member.id}>
-                  <TableCell className="font-medium">{member.name}</TableCell>
-                  <TableCell className="text-sm">{member.email}</TableCell>
-                  <TableCell className="max-w-xs truncate text-sm text-muted-foreground">
-                    {member.intro_text || '—'}
-                  </TableCell>
-                  <TableCell className="text-sm">{member.zip_code || '—'}</TableCell>
-                  <TableCell>
-                    <Badge variant={member.role === 'steward' ? 'default' : 'secondary'}>
-                      {member.role === 'steward' && <Shield className="h-3 w-3 mr-1" />}
-                      {member.role}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    {new Date(member.created_at).toLocaleDateString()}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      {/* All Members Table */}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Connection</TableHead>
+            <TableHead>Zip</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Joined</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {allMembers.map((member) => (
+            <TableRow key={member.id}>
+              <TableCell className="font-medium">{member.name}</TableCell>
+              <TableCell className="text-sm">{member.email}</TableCell>
+              <TableCell className="max-w-xs truncate text-sm text-muted-foreground">
+                {member.intro_text || '—'}
+              </TableCell>
+              <TableCell className="text-sm">{member.zip_code || '—'}</TableCell>
+              <TableCell>
+                <Badge variant={member.role === 'steward' ? 'default' : 'secondary'}>
+                  {member.role === 'steward' && <Shield className="h-3 w-3 mr-1" />}
+                  {member.role}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-sm">
+                {new Date(member.created_at).toLocaleDateString()}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
