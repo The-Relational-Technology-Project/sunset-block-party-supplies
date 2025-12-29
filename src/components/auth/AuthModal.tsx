@@ -107,8 +107,8 @@ export function AuthModal({ isOpen, onClose, mode, onSuccess }: AuthModalProps) 
     }
     
     toast({ 
-      title: "Check your email!", 
-      description: "We've sent you a confirmation link. Click it to access the site." 
+      title: "Account created!", 
+      description: "You can now sign in with your email and password." 
     });
     
     onClose();
