@@ -115,7 +115,7 @@ export function JoinRequestForm() {
 
         toast({ 
           title: "Request submitted!", 
-          description: "A community steward will review your application. Check your email to verify your account." 
+          description: "A community steward will review your application." 
         });
         setName("");
         setEmail("");
