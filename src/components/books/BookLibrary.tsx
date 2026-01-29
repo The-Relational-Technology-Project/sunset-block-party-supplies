@@ -101,14 +101,16 @@ export function BookLibrary() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-          {filteredBooks.map((book) => (
-            <BookCard
-              key={book.id}
-              book={book}
-              onClick={() => setSelectedBook(book)}
-            />
-          ))}
+        <div className="bg-white border border-border rounded-sm shadow-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 divide-x divide-border/50">
+            {filteredBooks.map((book) => (
+              <BookCard
+                key={book.id}
+                book={book}
+                onClick={() => setSelectedBook(book)}
+              />
+            ))}
+          </div>
         </div>
       )}
 

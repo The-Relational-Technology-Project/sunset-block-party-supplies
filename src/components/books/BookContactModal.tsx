@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Book } from "@/types/book";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { BookOpen, Send, Loader2 } from "lucide-react";
+import { Send, Loader2 } from "lucide-react";
 
 interface BookContactModalProps {
   isOpen: boolean;
@@ -28,10 +28,10 @@ export function BookContactModal({ isOpen, book, onClose }: BookContactModalProp
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name.trim() || !contact.trim() || !message.trim()) {
+    if (!name.trim() || !contact.trim()) {
       toast({
         title: "Missing information",
-        description: "Please fill in all fields",
+        description: "Please fill in your name and contact details",
         variant: "destructive",
       });
       return;
@@ -76,18 +76,16 @@ export function BookContactModal({ isOpen, book, onClose }: BookContactModalProp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-card border-border">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-terracotta" />
-            Borrow this book
+          <DialogTitle className="text-xl font-serif text-deep-brown">
+            {book.title}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Book details */}
-          <div className="bg-sand/50 p-4 rounded-sm border border-border">
-            <h3 className="font-semibold text-foreground">{book.title}</h3>
+          <div className="bg-white p-4 rounded-sm border border-border">
             {book.author && (
               <p className="text-sm text-muted-foreground italic">by {book.author}</p>
             )}
@@ -95,9 +93,6 @@ export function BookContactModal({ isOpen, book, onClose }: BookContactModalProp
               <Badge variant="outline" className="capitalize text-xs">
                 {book.condition}
               </Badge>
-              <span className="text-xs text-muted-foreground">
-                from {book.ownerName || 'Anonymous'}
-              </span>
             </div>
             {book.houseRules.length > 0 && (
               <div className="mt-3 pt-3 border-t border-border">
@@ -112,33 +107,46 @@ export function BookContactModal({ isOpen, book, onClose }: BookContactModalProp
           </div>
 
           {/* Contact form */}
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="name" className="text-sm">Your name</Label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="name" className="text-deep-brown font-medium">
+                Your Name *
+              </Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Your name"
+                placeholder="Enter your name"
+                required
+                className="border-border mt-1"
               />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="contact" className="text-sm">How to reach you</Label>
+            <div>
+              <Label htmlFor="contact" className="text-deep-brown font-medium">
+                Your Email or Phone *
+              </Label>
               <Input
                 id="contact"
                 value={contact}
                 onChange={(e) => setContact(e.target.value)}
-                placeholder="Email or phone"
+                placeholder="your-email@example.com"
+                required
+                className="border-border mt-1"
               />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="message" className="text-sm">Message</Label>
+            <div>
+              <Label htmlFor="message" className="text-deep-brown font-medium">
+                Message
+              </Label>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-1">
+                Add a personal note – e.g. why and when would you like to borrow this?
+              </p>
               <Textarea
                 id="message"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="When would you like to borrow it?"
-                rows={3}
+                placeholder=""
+                className="border-border min-h-[100px]"
               />
             </div>
             <Button type="submit" className="w-full" disabled={sending}>
@@ -150,7 +158,7 @@ export function BookContactModal({ isOpen, book, onClose }: BookContactModalProp
               ) : (
                 <>
                   <Send className="h-4 w-4 mr-2" />
-                  Send request
+                  Send Request
                 </>
               )}
             </Button>
