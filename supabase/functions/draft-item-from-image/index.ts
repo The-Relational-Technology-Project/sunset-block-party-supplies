@@ -1,10 +1,32 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const DraftItemSchema = z.object({
+  imageUrl: z.string()
+    .trim()
+    .min(1, "Image URL is required")
+    .max(5000, "Image URL is too long")
+    .refine(
+      (url) => {
+        try {
+          const parsed = new URL(url);
+          return parsed.protocol === 'http:' || parsed.protocol === 'https:' || url.startsWith('data:image/');
+        } catch {
+          return url.startsWith('data:image/');
+        }
+      },
+      "Must be a valid HTTP/HTTPS URL or data URL"
+    ),
+  userId: z.string()
+    .uuid("Invalid user ID format"),
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -12,11 +34,29 @@ serve(async (req) => {
   }
 
   try {
-    const { imageUrl, userId } = await req.json();
-
-    if (!imageUrl || !userId) {
-      throw new Error('Image URL and user ID are required');
+    const rawBody = await req.json();
+    
+    // Validate input
+    const validationResult = DraftItemSchema.safeParse(rawBody);
+    
+    if (!validationResult.success) {
+      console.error("Validation error:", validationResult.error.errors);
+      return new Response(
+        JSON.stringify({ 
+          error: "Invalid input data",
+          details: validationResult.error.errors.map(e => ({
+            field: e.path.join('.'),
+            message: e.message
+          }))
+        }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
+
+    const { imageUrl, userId } = validationResult.data;
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -124,7 +164,7 @@ Return ONLY valid JSON with these exact keys, no markdown formatting.`
   } catch (error) {
     console.error('Error in draft-item-from-image:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
