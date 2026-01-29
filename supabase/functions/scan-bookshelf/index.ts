@@ -1,9 +1,29 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
+
+// Input validation schema
+const ScanBookshelfSchema = z.object({
+  imageUrl: z.string()
+    .trim()
+    .min(1, "Image URL is required")
+    .max(5000, "Image URL is too long")
+    .refine(
+      (url) => {
+        try {
+          const parsed = new URL(url);
+          return parsed.protocol === 'http:' || parsed.protocol === 'https:' || url.startsWith('data:image/');
+        } catch {
+          return url.startsWith('data:image/');
+        }
+      },
+      "Must be a valid HTTP/HTTPS URL or data URL"
+    ),
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -11,14 +31,29 @@ serve(async (req) => {
   }
 
   try {
-    const { imageUrl } = await req.json();
+    const rawBody = await req.json();
     
-    if (!imageUrl) {
+    // Validate input
+    const validationResult = ScanBookshelfSchema.safeParse(rawBody);
+    
+    if (!validationResult.success) {
+      console.error("Validation error:", validationResult.error.errors);
       return new Response(
-        JSON.stringify({ error: 'Image URL is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          error: "Invalid input data",
+          details: validationResult.error.errors.map(e => ({
+            field: e.path.join('.'),
+            message: e.message
+          }))
+        }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
       );
     }
+
+    const { imageUrl } = validationResult.data;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
