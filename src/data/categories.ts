@@ -1,6 +1,6 @@
 import { 
   Wrench, Home, Palette, Tent, Trophy, Waves, 
-  PartyPopper, UtensilsCrossed, Baby, Box 
+  PartyPopper, UtensilsCrossed, Baby, Box, BookOpen 
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
@@ -8,9 +8,11 @@ export interface Category {
   id: string;
   name: string;
   icon: LucideIcon;
+  isSpecial?: boolean;
 }
 
 export const categories: Category[] = [
+  { id: "books", name: "Books", icon: BookOpen, isSpecial: true },
   { id: "tools", name: "Tools", icon: Wrench },
   { id: "home-diy", name: "Home & DIY", icon: Home },
   { id: "art-craft", name: "Art & Craft", icon: Palette },
@@ -30,4 +32,9 @@ export const getCategoryById = (id: string): Category | undefined => {
 export const getCategoryName = (id: string): string => {
   const category = getCategoryById(id);
   return category ? category.name : id;
+};
+
+export const isSpecialCategory = (id: string): boolean => {
+  const category = getCategoryById(id);
+  return category?.isSpecial ?? false;
 };

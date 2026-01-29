@@ -7,11 +7,12 @@ import { Supply } from "@/types/supply";
 import { useSupplies } from "@/hooks/useSupplies";
 import { Loader2, SlidersHorizontal, Search } from "lucide-react";
 import { CategorySidebar } from "./CategorySidebar";
-import { categories } from "@/data/categories";
+import { categories, isSpecialCategory } from "@/data/categories";
 import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { BookLibrary } from "./books/BookLibrary";
 
 export function BrowseSupplies() {
   const { supplies, loading } = useSupplies();
@@ -21,7 +22,13 @@ export function BrowseSupplies() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSupply, setSelectedSupply] = useState<Supply | null>(null);
 
+  // Check if a special category (like books) is selected
+  const isSpecialCategorySelected = isSpecialCategory(categoryFilter);
+
   const filteredSupplies = useMemo(() => {
+    // Don't compute filtered supplies if viewing a special category
+    if (isSpecialCategorySelected) return [];
+    
     return supplies.filter((supply) => {
       // Don't show items that are currently lent out
       if (supply.lentOut) return false;
@@ -37,9 +44,10 @@ export function BrowseSupplies() {
 
       return matchesCategory && matchesCondition && matchesAvailability && matchesSearch;
     });
-  }, [supplies, categoryFilter, conditionFilter, availabilityFilter, searchQuery]);
+  }, [supplies, categoryFilter, conditionFilter, availabilityFilter, searchQuery, isSpecialCategorySelected]);
 
-  if (loading) {
+  // Don't show loading state for special categories (they have their own)
+  if (loading && !isSpecialCategorySelected) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -176,59 +184,66 @@ export function BrowseSupplies() {
             </Sheet>
           </div>
 
-          {/* Desktop Filters */}
-          <div className="hidden md:block bg-white border border-border rounded-sm p-3 mb-6 shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Condition:
-                </label>
-                <Select value={conditionFilter} onValueChange={setConditionFilter}>
-                  <SelectTrigger className="h-8 w-32 border-border bg-white text-xs">
-                    <SelectValue placeholder="Any" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    <SelectItem value="all">Any</SelectItem>
-                    <SelectItem value="excellent">Excellent</SelectItem>
-                    <SelectItem value="good">Good</SelectItem>
-                    <SelectItem value="fair">Fair</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Availability:
-                </label>
-                <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
-                  <SelectTrigger className="h-8 w-32 border-border bg-white text-xs">
-                    <SelectValue placeholder="Any" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    <SelectItem value="all">Any</SelectItem>
-                    <SelectItem value="available">Available</SelectItem>
-                    <SelectItem value="unavailable">Unavailable</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          {/* Results Grid */}
-          {filteredSupplies.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-lg text-muted-foreground">No supplies found matching your criteria.</p>
-            </div>
+          {/* Conditional rendering: Books vs Supplies */}
+          {isSpecialCategorySelected && categoryFilter === "books" ? (
+            <BookLibrary />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {filteredSupplies.map((supply) => (
-                <SupplyCard
-                  key={supply.id}
-                  supply={supply}
-                  onViewContact={setSelectedSupply}
-                />
-              ))}
-            </div>
+            <>
+              {/* Desktop Filters */}
+              <div className="hidden md:block bg-white border border-border rounded-sm p-3 mb-6 shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs font-medium text-muted-foreground">
+                      Condition:
+                    </label>
+                    <Select value={conditionFilter} onValueChange={setConditionFilter}>
+                      <SelectTrigger className="h-8 w-32 border-border bg-white text-xs">
+                        <SelectValue placeholder="Any" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white">
+                        <SelectItem value="all">Any</SelectItem>
+                        <SelectItem value="excellent">Excellent</SelectItem>
+                        <SelectItem value="good">Good</SelectItem>
+                        <SelectItem value="fair">Fair</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs font-medium text-muted-foreground">
+                      Availability:
+                    </label>
+                    <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
+                      <SelectTrigger className="h-8 w-32 border-border bg-white text-xs">
+                        <SelectValue placeholder="Any" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white">
+                        <SelectItem value="all">Any</SelectItem>
+                        <SelectItem value="available">Available</SelectItem>
+                        <SelectItem value="unavailable">Unavailable</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Results Grid */}
+              {filteredSupplies.length === 0 ? (
+                <div className="text-center py-16">
+                  <p className="text-lg text-muted-foreground">No supplies found matching your criteria.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  {filteredSupplies.map((supply) => (
+                    <SupplyCard
+                      key={supply.id}
+                      supply={supply}
+                      onViewContact={setSelectedSupply}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

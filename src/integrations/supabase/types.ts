@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      books: {
+        Row: {
+          author: string | null
+          condition: string
+          created_at: string
+          genre: string | null
+          house_rules: string[] | null
+          id: string
+          lender_notes: string | null
+          lent_out: boolean | null
+          owner_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author?: string | null
+          condition?: string
+          created_at?: string
+          genre?: string | null
+          house_rules?: string[] | null
+          id?: string
+          lender_notes?: string | null
+          lent_out?: boolean | null
+          owner_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string | null
+          condition?: string
+          created_at?: string
+          genre?: string | null
+          house_rules?: string[] | null
+          id?: string
+          lender_notes?: string | null
+          lent_out?: boolean | null
+          owner_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "books_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       join_requests: {
         Row: {
           connection_context: string | null
@@ -275,6 +325,23 @@ export type Database = {
       check_join_request_rate_limit: {
         Args: { request_email: string }
         Returns: boolean
+      }
+      get_books_with_owners: {
+        Args: never
+        Returns: {
+          author: string
+          condition: string
+          created_at: string
+          genre: string
+          house_rules: string[]
+          id: string
+          lender_notes: string
+          lent_out: boolean
+          owner_id: string
+          owner_name: string
+          title: string
+          updated_at: string
+        }[]
       }
       get_public_profile: {
         Args: { profile_id: string }
