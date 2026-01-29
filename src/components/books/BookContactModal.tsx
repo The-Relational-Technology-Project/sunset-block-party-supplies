@@ -37,24 +37,36 @@ export function BookContactModal({ isOpen, book, onClose }: BookContactModalProp
       return;
     }
 
+    if (!book.ownerEmail) {
+      toast({
+        title: "Cannot send request",
+        description: "The book owner's contact information is not available.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSending(true);
 
     try {
-      // Create a supply request for the book (reusing existing table)
-      const { error } = await supabase.from("supply_requests").insert({
-        supply_id: book.id,
-        supply_name: `Book: ${book.title}`,
-        supply_owner_id: book.ownerId,
-        sender_name: name.trim(),
-        sender_contact: contact.trim(),
-        message: message.trim(),
+      // Use the edge function to send email notifications
+      const response = await supabase.functions.invoke('send-contact-message', {
+        body: {
+          supplyId: book.id,
+          supplyName: `Book: ${book.title}`,
+          supplyOwnerId: book.ownerId,
+          supplyOwnerEmail: book.ownerEmail,
+          senderName: name.trim(),
+          senderContact: contact.trim(),
+          message: message.trim() || `I'd like to borrow "${book.title}".`
+        }
       });
 
-      if (error) throw error;
+      if (response.error) throw response.error;
 
       toast({
         title: "Request sent!",
-        description: `Your borrowing request for "${book.title}" has been sent to ${book.ownerName?.split(' ')[0] || 'the owner'}.`,
+        description: `Your borrowing request for "${book.title}" has been sent.`,
       });
 
       // Reset form and close

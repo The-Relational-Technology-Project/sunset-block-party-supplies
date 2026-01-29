@@ -337,6 +337,7 @@ export type Database = {
           id: string
           lender_notes: string
           lent_out: boolean
+          owner_email: string
           owner_id: string
           owner_name: string
           title: string
