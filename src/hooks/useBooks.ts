@@ -11,6 +11,7 @@ interface RawBook {
   house_rules: string[] | null;
   owner_id: string;
   owner_name: string;
+  owner_email: string | null;
   lent_out: boolean | null;
   lender_notes: string | null;
   created_at: string;
@@ -26,6 +27,7 @@ const transformBook = (raw: RawBook): Book => ({
   houseRules: raw.house_rules || [],
   ownerId: raw.owner_id,
   ownerName: raw.owner_name,
+  ownerEmail: raw.owner_email,
   lentOut: raw.lent_out || false,
   lenderNotes: raw.lender_notes,
   createdAt: raw.created_at,
