@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Shield, UserPlus } from "lucide-react";
+import { Users, Shield, UserPlus, Copy, Check } from "lucide-react";
 
 interface CommunityStats {
   totalMembers: number;
@@ -31,7 +32,14 @@ export function CommunityOverview() {
   });
   const [allMembers, setAllMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
+  const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const copyEmail = async (email: string) => {
+    await navigator.clipboard.writeText(email);
+    setCopiedEmail(email);
+    setTimeout(() => setCopiedEmail(null), 2000);
+  };
 
   const fetchCommunityData = async () => {
     try {
@@ -129,7 +137,23 @@ export function CommunityOverview() {
           {allMembers.map((member) => (
             <TableRow key={member.id}>
               <TableCell className="font-medium">{member.name}</TableCell>
-              <TableCell className="text-sm">{member.email}</TableCell>
+              <TableCell className="text-sm">
+                <div className="flex items-center gap-1">
+                  <span>{member.email}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => copyEmail(member.email)}
+                  >
+                  {copiedEmail === member.email ? (
+                      <Check className="h-3 w-3 text-primary" />
+                    ) : (
+                      <Copy className="h-3 w-3" />
+                    )}
+                  </Button>
+                </div>
+              </TableCell>
               <TableCell className="max-w-xs truncate text-sm text-muted-foreground">
                 {member.intro_text || '—'}
               </TableCell>
