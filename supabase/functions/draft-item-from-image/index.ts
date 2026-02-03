@@ -7,7 +7,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Input validation schema
+// Input validation schema - userId removed since we get it from JWT
 const DraftItemSchema = z.object({
   imageUrl: z.string()
     .trim()
@@ -24,8 +24,6 @@ const DraftItemSchema = z.object({
       },
       "Must be a valid HTTP/HTTPS URL or data URL"
     ),
-  userId: z.string()
-    .uuid("Invalid user ID format"),
 });
 
 serve(async (req) => {
@@ -34,6 +32,38 @@ serve(async (req) => {
   }
 
   try {
+    // Verify user authentication and vouched status
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid or expired token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check if user is vouched
+    const { data: isVouched } = await supabase.rpc('is_user_vouched', { user_id: user.id });
+    if (!isVouched) {
+      return new Response(
+        JSON.stringify({ error: 'User must be vouched to use AI features' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const rawBody = await req.json();
     
     // Validate input
@@ -56,11 +86,10 @@ serve(async (req) => {
       );
     }
 
-    const { imageUrl, userId } = validationResult.data;
-
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const { imageUrl } = validationResult.data;
+    
+    // Use authenticated user's ID instead of trusting client-provided userId
+    const userId = user.id;
 
     // Fetch user's most recent item for context
     const { data: recentItems } = await supabase

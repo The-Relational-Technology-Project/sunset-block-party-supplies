@@ -90,8 +90,7 @@ export function AddSupply() {
         // Call AI to draft the item
         const { data, error } = await supabase.functions.invoke('draft-item-from-image', {
           body: {
-            imageUrl: imageDataUrl,
-            userId: user.id
+            imageUrl: imageDataUrl
           }
         });
 
