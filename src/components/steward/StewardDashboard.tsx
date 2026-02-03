@@ -1,9 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Users, Package, MessageSquare } from "lucide-react";
+import { Shield, Users, Package, MessageSquare, Mail } from "lucide-react";
 import { CommunityOverview } from "./CommunityOverview";
 import { SupplyRequestsManager } from "./SupplyRequestsManager";
 import { AllSuppliesManager } from "./AllSuppliesManager";
+import { BulkEmailSender } from "./BulkEmailSender";
 
 export function StewardDashboard() {
   return (
@@ -17,7 +18,7 @@ export function StewardDashboard() {
       </div>
 
       <Tabs defaultValue="members" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="members" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Members
@@ -28,7 +29,11 @@ export function StewardDashboard() {
           </TabsTrigger>
           <TabsTrigger value="requests" className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4" />
-            Supply Requests
+            Requests
+          </TabsTrigger>
+          <TabsTrigger value="email" className="flex items-center gap-2">
+            <Mail className="h-4 w-4" />
+            Email
           </TabsTrigger>
         </TabsList>
 
@@ -70,6 +75,20 @@ export function StewardDashboard() {
             </CardHeader>
             <CardContent>
               <SupplyRequestsManager />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="email">
+          <Card>
+            <CardHeader>
+              <CardTitle>Email Updates</CardTitle>
+              <CardDescription>
+                Send bulk email updates to community members
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <BulkEmailSender />
             </CardContent>
           </Card>
         </TabsContent>
