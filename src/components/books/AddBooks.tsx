@@ -13,6 +13,7 @@ import {
   Upload, Loader2, BookOpen, Camera, Check, X, Plus, 
   Trash2, Edit2, ImagePlus 
 } from "lucide-react";
+import { compressImage } from "@/lib/imageCompression";
 
 interface AddBooksProps {
   onComplete?: () => void;
@@ -42,6 +43,7 @@ export function AddBooks({ onComplete }: AddBooksProps) {
 
     setIsScanning(true);
 
+    let tempFilePath: string | null = null;
     try {
       // Convert to base64
       const reader = new FileReader();
@@ -51,11 +53,27 @@ export function AddBooks({ onComplete }: AddBooksProps) {
         reader.readAsDataURL(file);
       });
 
-      const imageUrl = await base64Promise;
+      const imageDataUrl = await base64Promise;
 
-      // Call the edge function
+      // Compress and upload to storage
+      const compressedImage = await compressImage(imageDataUrl);
+      const res = await fetch(compressedImage);
+      const blob = await res.blob();
+      tempFilePath = `tmp/${crypto.randomUUID()}.jpg`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('supply-images')
+        .upload(tempFilePath, blob, { contentType: 'image/jpeg' });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('supply-images')
+        .getPublicUrl(tempFilePath);
+
+      // Call the edge function with the short URL
       const { data, error } = await supabase.functions.invoke("scan-bookshelf", {
-        body: { imageUrl },
+        body: { imageUrl: urlData.publicUrl },
       });
 
       if (error) throw error;
@@ -89,6 +107,10 @@ export function AddBooks({ onComplete }: AddBooksProps) {
       });
     } finally {
       setIsScanning(false);
+      // Clean up temp file from storage
+      if (tempFilePath) {
+        supabase.storage.from('supply-images').remove([tempFilePath]).catch(() => {});
+      }
     }
   }, [toast]);
 
