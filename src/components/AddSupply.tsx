@@ -74,10 +74,13 @@ export function AddSupply() {
       return;
     }
 
-    if (!user) {
+    // Re-check auth directly to avoid stale state race condition
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    if (!currentUser) {
       toast.error("You must be logged in to add items");
       return;
     }
+    if (!user) setUser(currentUser);
 
     setIsDraftingWithAI(true);
 
