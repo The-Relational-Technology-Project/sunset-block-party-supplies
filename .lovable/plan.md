@@ -1,37 +1,46 @@
 
 
-## Client-Side Image Compression for Phone Uploads
+## Fix Image Upload: Storage URL + Error Handling
 
-### Problem
-Phone cameras produce 4-5MB images. When converted to base64 (33% size increase), they exceed the 2MB Supabase Edge Function request body limit, causing "Failed to analyze image" errors.
+### Root Cause (Updated)
+The primary failure is **NOT image size** -- it's the Zod validation `.max(5000)` on the `imageUrl` field in the edge function. Even a compressed base64 data URL is ~270,000 characters, so validation rejects it before AI analysis even begins. There's also a broken error handling pattern that can cause the spinner to hang.
 
-### Solution
-Add a `compressImage` utility function that uses the browser's Canvas API to resize and compress images before sending them to the AI. This happens entirely in the browser -- no extra libraries needed.
+### Solution: Upload to Supabase Storage, pass short URL
 
-### How It Works
-1. User selects a photo (up to 5MB accepted)
-2. Before sending to AI, the image is drawn onto a canvas at a max dimension of 1200px
-3. The canvas exports as JPEG at 0.7 quality, typically producing images under 200KB
-4. The compressed base64 string is sent to the edge function (well within the 2MB limit)
-5. The original full-quality image is still stored for display purposes
+Upload the compressed image to a Supabase Storage bucket, then pass the short public URL (~150 chars) to the edge function. This fixes both the validation limit and any future body size concerns.
 
 ### Files to Change
 
-**1. Create `src/lib/imageCompression.ts`**
-- Export an `async compressImage(dataUrl: string, maxDimension?: number, quality?: number): Promise<string>` function
-- Uses `HTMLImageElement` + `HTMLCanvasElement` to resize and re-encode as JPEG
-- Defaults: max 1200px dimension, 0.7 JPEG quality
+**1. Database migration: Create `supply-images` storage bucket**
+- Create a public storage bucket called `supply-images`
+- Add RLS policy allowing authenticated users to upload files
+- Add RLS policy allowing public read access (so the AI gateway can fetch the image)
 
 **2. Modify `src/components/AddSupply.tsx`**
-- Import `compressImage`
-- In `handleImageUpload`, after reading the file as a data URL, compress it before passing to the `draft-item-from-image` edge function
-- Keep the original data URL for display/storage, only use compressed version for AI analysis
+- After compressing the image, upload it to `supply-images` bucket with a temp filename
+- Get the public URL and pass that to the edge function instead of base64
+- Fix error handling: wrap the async callback body in its own try/catch so errors from `compressImage` or `invoke` are properly caught and show a toast instead of hanging
+- Clean up the temp file from storage after AI responds (success or failure)
 
-### Technical Detail
+**3. No changes needed to edge functions**
+- The `.max(5000)` validation is actually correct for URLs (just not for base64 data URLs)
+- The AI gateway already accepts standard image URLs
+
+**4. Apply same pattern to bookshelf scanner (`src/components/books/AddBooks.tsx`)**
+- If it also sends base64 data URLs, apply the same storage-upload approach
+
+### Flow After Fix
 
 ```text
-compressImage flow:
-  dataUrl -> Image element -> Canvas (max 1200px) -> toDataURL('image/jpeg', 0.7) -> compressed string
+Phone photo (4MB)
+  -> compress in browser (~200KB JPEG)
+  -> upload to Supabase Storage bucket "supply-images"
+  -> get public URL (~150 chars, e.g. https://mbmmfgivhqzhjyneyelu.supabase.co/storage/v1/object/public/supply-images/tmp/abc123.jpg)
+  -> send URL to edge function (passes .max(5000) validation easily)
+  -> AI analyzes image via URL
+  -> delete temp file from storage
 ```
 
-No new dependencies required -- Canvas API is available in all modern browsers including mobile Safari and Chrome.
+### Error Handling Fix
+
+Move the try/catch inside the `reader.onloadend` async callback so that errors from `compressImage` and `supabase.functions.invoke` are properly caught, show a toast, and reset the loading spinner -- instead of becoming unhandled promise rejections.
