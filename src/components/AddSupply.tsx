@@ -9,6 +9,7 @@ import { Loader2, Upload, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { HouseRules } from "@/components/HouseRules";
 import { supabase } from "@/integrations/supabase/client";
+import { compressImage } from "@/lib/imageCompression";
 import { categories } from "@/data/categories";
 
 export function AddSupply() {
@@ -87,10 +88,13 @@ export function AddSupply() {
         const imageDataUrl = reader.result as string;
         setUploadedImage(imageDataUrl);
 
+        // Compress image for AI analysis (keeps original for display)
+        const compressedImage = await compressImage(imageDataUrl);
+
         // Call AI to draft the item
         const { data, error } = await supabase.functions.invoke('draft-item-from-image', {
           body: {
-            imageUrl: imageDataUrl
+            imageUrl: compressedImage
           }
         });
 
