@@ -84,21 +84,36 @@ export function AddSupply() {
 
     setIsDraftingWithAI(true);
 
-    try {
-      // Convert image to data URL
-      const reader = new FileReader();
-      reader.onloadend = async () => {
+    // Convert image to data URL for display
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      let tempFilePath: string | null = null;
+      try {
         const imageDataUrl = reader.result as string;
         setUploadedImage(imageDataUrl);
 
-        // Compress image for AI analysis (keeps original for display)
+        // Compress image for AI analysis
         const compressedImage = await compressImage(imageDataUrl);
 
-        // Call AI to draft the item
+        // Convert compressed base64 to blob for storage upload
+        const res = await fetch(compressedImage);
+        const blob = await res.blob();
+        tempFilePath = `tmp/${crypto.randomUUID()}.jpg`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('supply-images')
+          .upload(tempFilePath, blob, { contentType: 'image/jpeg' });
+
+        if (uploadError) throw uploadError;
+
+        // Get the public URL to pass to edge function
+        const { data: urlData } = supabase.storage
+          .from('supply-images')
+          .getPublicUrl(tempFilePath);
+
+        // Call AI to draft the item using the short URL
         const { data, error } = await supabase.functions.invoke('draft-item-from-image', {
-          body: {
-            imageUrl: compressedImage
-          }
+          body: { imageUrl: urlData.publicUrl }
         });
 
         if (error) {
@@ -119,7 +134,7 @@ export function AddSupply() {
           condition: data.condition || "good",
           neighborhood: data.neighborhood || savedNeighborhood || "",
           crossStreets: data.crossStreets || savedCrossStreets || "",
-          contactEmail: data.contactEmail || userProfile?.email || user.email || "",
+          contactEmail: data.contactEmail || userProfile?.email || currentUser.email || "",
           images: [imageDataUrl],
         });
 
@@ -127,14 +142,19 @@ export function AddSupply() {
         setShowForm(true);
         setIsDraftingWithAI(false);
         toast.success("✨ Item details drafted by AI! Review and edit as needed.");
-      };
+      } catch (error: any) {
+        console.error('Error processing image:', error);
+        toast.error('Failed to process image. Please try again.');
+        setIsDraftingWithAI(false);
+      } finally {
+        // Clean up temp file from storage
+        if (tempFilePath) {
+          supabase.storage.from('supply-images').remove([tempFilePath]).catch(() => {});
+        }
+      }
+    };
 
-      reader.readAsDataURL(file);
-    } catch (error: any) {
-      console.error('Error processing image:', error);
-      toast.error('Failed to process image. Please try again.');
-      setIsDraftingWithAI(false);
-    }
+    reader.readAsDataURL(file);
   };
 
 
