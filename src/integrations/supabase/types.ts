@@ -344,6 +344,12 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_public_illustrations: {
+        Args: never
+        Returns: {
+          illustration_url: string
+        }[]
+      }
       get_public_profile: {
         Args: { profile_id: string }
         Returns: {
