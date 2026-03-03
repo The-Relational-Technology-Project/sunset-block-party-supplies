@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AuthModal } from "./auth/AuthModal";
 import { Footer } from "./Footer";
 import { categories } from "@/data/categories";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface LandingPageProps {
   onTabChange: (tab: string) => void;
@@ -12,6 +13,8 @@ interface LandingPageProps {
 export function LandingPage({ onTabChange }: LandingPageProps) {
   const [user, setUser] = useState<any>(null);
   const [modalMode, setModalMode] = useState<'login' | 'signup' | null>(null);
+  const [illustrations, setIllustrations] = useState<string[]>([]);
+  const [loadingIllustrations, setLoadingIllustrations] = useState(true);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -28,34 +31,27 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
     return () => subscription.unsubscribe();
   }, []);
 
-  return (
-    <div className="min-h-screen bg-sand flex flex-col relative overflow-hidden">
-      {/* Decorative hand-drawn supplies in background */}
-      <div className="absolute inset-0 pointer-events-none opacity-5">
-        <img 
-          src="/lovable-uploads/hand-drawn-supplies-1.png" 
-          alt="" 
-          className="absolute top-20 left-10 w-32 h-32 rotate-12 hidden md:block"
-        />
-        <img 
-          src="/lovable-uploads/hand-drawn-supplies-2.png" 
-          alt="" 
-          className="absolute top-40 right-20 w-28 h-28 -rotate-6 hidden lg:block"
-        />
-        <img 
-          src="/lovable-uploads/hand-drawn-supplies-3.png" 
-          alt="" 
-          className="absolute bottom-40 left-20 w-36 h-36 rotate-6 hidden md:block"
-        />
-        <img 
-          src="/lovable-uploads/hand-drawn-supplies-4.png" 
-          alt="" 
-          className="absolute bottom-20 right-32 w-32 h-32 -rotate-12 hidden lg:block"
-        />
-      </div>
+  useEffect(() => {
+    const fetchIllustrations = async () => {
+      try {
+        const { data, error } = await supabase.rpc('get_public_illustrations');
+        if (!error && data) {
+          setIllustrations(data.map((row: { illustration_url: string }) => row.illustration_url));
+        }
+      } catch (e) {
+        console.error('Failed to fetch illustrations:', e);
+      } finally {
+        setLoadingIllustrations(false);
+      }
+    };
 
+    fetchIllustrations();
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-sand flex flex-col">
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-8 sm:py-16 text-center flex-1 relative z-10">
+      <section className="container mx-auto px-4 py-8 sm:py-16 text-center relative z-10">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-deep-brown mb-4 sm:mb-6 leading-tight">
             Community Supplies
@@ -104,31 +100,68 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
             </div>
           )}
 
-          {/* Categories Grid */}
-          <div className="mb-8 sm:mb-16">
-            <h2 className="text-xl sm:text-2xl font-serif font-semibold text-deep-brown mb-6 sm:mb-8">
+          {/* Category Chips */}
+          <div className="mb-8 sm:mb-12">
+            <h2 className="text-xl sm:text-2xl font-serif font-semibold text-deep-brown mb-4 sm:mb-6">
               What We're Sharing
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
               {categories.map((category) => {
                 const Icon = category.icon;
                 return (
-                  <button
+                  <div
                     key={category.id}
-                    onClick={() => onTabChange('browse')}
-                    className="bg-card border border-terracotta/20 hover:border-terracotta hover:shadow-md transition-all p-4 sm:p-6 rounded-sm group min-h-[80px] active:scale-95"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-card border border-border rounded-full text-xs sm:text-sm font-medium text-deep-brown"
                   >
-                    <Icon className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 sm:mb-3 text-terracotta" />
-                    <div className="text-xs sm:text-sm font-medium text-deep-brown group-hover:text-terracotta transition-colors">
-                      {category.name}
-                    </div>
-                  </button>
+                    <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-terracotta" />
+                    {category.name}
+                  </div>
                 );
               })}
             </div>
           </div>
         </div>
       </section>
+
+      {/* Illustration Gallery */}
+      {(loadingIllustrations || illustrations.length > 0) && (
+        <section className="container mx-auto px-4 pb-8 sm:pb-16">
+          <h2 className="text-xl sm:text-2xl font-serif font-semibold text-deep-brown mb-6 text-center">
+            A Peek Inside
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 max-w-5xl mx-auto">
+            {loadingIllustrations
+              ? Array.from({ length: 10 }).map((_, i) => (
+                  <Skeleton key={i} className="aspect-square rounded-sm" />
+                ))
+              : illustrations.map((url, i) => (
+                  <div
+                    key={i}
+                    className="aspect-square bg-white border border-border rounded-sm overflow-hidden flex items-center justify-center"
+                  >
+                    <img
+                      src={url}
+                      alt=""
+                      className="w-full h-full object-contain p-3"
+                      loading="lazy"
+                    />
+                  </div>
+                ))}
+          </div>
+
+          {!user && illustrations.length > 0 && (
+            <div className="text-center mt-6 sm:mt-8">
+              <Button
+                variant="link"
+                onClick={() => setModalMode('signup')}
+                className="text-terracotta font-medium text-sm sm:text-base"
+              >
+                Join to browse all →
+              </Button>
+            </div>
+          )}
+        </section>
+      )}
 
       <Footer />
 
