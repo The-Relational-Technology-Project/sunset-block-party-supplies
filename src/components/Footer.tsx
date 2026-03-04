@@ -41,7 +41,7 @@ const SIBLING_SITES: SiblingSite[] = [
   pinColor: "#5a7a52"
 },
 {
-  question: "Looking for a cozy hangout?",
+  question: "Live near 48th and Irving?",
   name: "Cozy Corner",
   domain: "cozycorner.place",
   url: "https://cozycorner.place",
