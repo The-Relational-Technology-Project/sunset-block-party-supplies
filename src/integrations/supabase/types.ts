@@ -177,6 +177,24 @@ export type Database = {
           },
         ]
       }
+      site_config: {
+        Row: {
+          key: string
+          updated_at: string | null
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string | null
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       supplies: {
         Row: {
           category: string
