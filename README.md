@@ -24,9 +24,9 @@ A neighborhood sharing library where neighbors can lend and borrow supplies, too
 The easiest way to create your own version of this site for your community:
 
 1. **Go to [studio.relationaltechproject.org](https://studio.relationaltechproject.org/)**
-2. **Remix the project** — Click the project name → Settings → "Remix this project" to create your own copy
+2. **Remix the project** — Chat with Sidekick about remixing Community Supplies
 3. **Customize** — Update the branding, neighborhood name, categories, and colors to match your community
-4. **Connect Supabase** — Set up your own Supabase project for auth and data storage
+4. **Build in Lovable or Other Tool** — Create the remixed site and set up your database
 5. **Publish** — Deploy your community supplies site and share it with your neighbors
 
 ### Running locally
