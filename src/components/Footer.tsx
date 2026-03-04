@@ -31,7 +31,7 @@ const SIBLING_SITES: SiblingSite[] = [
   pinColor: "#c37c67"
 },
 {
-  question: "What's happening today?",
+  question: "Curious what's happening today?",
   name: "Outer Sunset Today",
   domain: "outersunset.today",
   url: "https://outersunset.today",
