@@ -21,10 +21,10 @@ const SIBLING_SITES: SiblingSite[] = [
   pinColor: "#3a6e9e"
 },
 {
-  question: "Need to borrow something?",
-  name: "Community Supplies",
-  domain: "communitysupplies.org",
-  url: "https://communitysupplies.org",
+  question: "Exploring the neighborhood?",
+  name: "Outer Sunset Field Guide",
+  domain: "outersunset.place",
+  url: "https://outersunset.place",
   cardBg: "#fdf5ec",
   rotation: "1.5deg",
   pinPosition: "left-1/2 -translate-x-1/2",
