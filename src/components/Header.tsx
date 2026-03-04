@@ -1,5 +1,5 @@
 
-import { Gift, Search, Plus, Sparkles, Menu, X, Shield } from "lucide-react";
+import { Search, Plus, Sparkles, Menu, X, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
