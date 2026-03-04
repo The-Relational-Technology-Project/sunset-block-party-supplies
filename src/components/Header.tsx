@@ -1,5 +1,5 @@
 
-import { Gift, Search, Plus, Sparkles, Menu, X, Shield } from "lucide-react";
+import { Search, Plus, Sparkles, Menu, X, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -110,16 +110,12 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
   };
 
   return (
-    <header className="bg-gradient-to-r from-primary to-accent shadow-lg">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-sand">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2 cursor-pointer" onClick={() => handleTabChange('home')}>
-            <Gift className="h-8 w-8 text-primary-foreground" />
-            <div>
-              <h1 className="text-xl md:text-2xl font-bold text-primary-foreground">Community Supplies</h1>
-              <p className="text-primary-foreground/80 text-xs md:text-sm">Share what you have, borrow what you need</p>
-            </div>
-          </div>
+          <button className="cursor-pointer" onClick={() => handleTabChange('home')}>
+            <h1 className="text-lg md:text-xl font-serif font-bold text-deep-brown hover:text-primary transition-colors">Community Supplies</h1>
+          </button>
           
           {/* Desktop Navigation & Auth */}
           <div className="hidden md:flex items-center space-x-4">
@@ -130,11 +126,6 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
                     key={key} 
                     variant={activeTab === key ? 'secondary' : 'ghost'} 
                     onClick={() => handleTabChange(key)} 
-                    className={`transition-colors ${
-                      activeTab === key 
-                        ? 'bg-background text-foreground hover:bg-background/90' 
-                        : 'text-primary-foreground hover:bg-primary-foreground/10'
-                    }`}
                   >
                     <Icon className="h-4 w-4 mr-2" />
                     {label}
@@ -144,7 +135,6 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
                   <Button 
                     variant="ghost"
                     onClick={() => handleTabChange('steward')} 
-                    className="text-primary-foreground hover:bg-primary-foreground/10"
                   >
                     <Shield className="h-4 w-4 mr-2" />
                     Steward
@@ -160,7 +150,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="md:hidden text-primary-foreground hover:bg-primary-foreground/10" 
+            className="md:hidden" 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -169,7 +159,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
 
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
-          <nav className="md:hidden mt-4 pb-4 border-t border-primary-foreground/20 pt-4">
+          <nav className="md:hidden mt-4 pb-4 border-t border-border pt-4">
             <div className="flex flex-col space-y-2">
               {user ? (
                 <>
@@ -178,11 +168,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
                       key={key} 
                       variant={activeTab === key ? 'secondary' : 'ghost'} 
                       onClick={() => handleTabChange(key)} 
-                      className={`w-full justify-start transition-colors ${
-                        activeTab === key 
-                          ? 'bg-background text-foreground hover:bg-background/90' 
-                          : 'text-primary-foreground hover:bg-primary-foreground/10'
-                      }`}
+                      className="w-full justify-start"
                     >
                       <Icon className="h-4 w-4 mr-2" />
                       {label}
@@ -192,13 +178,13 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
                     <Button 
                       variant="ghost"
                       onClick={() => handleTabChange('steward')} 
-                      className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+                      className="w-full justify-start"
                     >
                       <Shield className="h-4 w-4 mr-2" />
                       Steward Dashboard
                     </Button>
                   )}
-                  <div className="pt-2 border-t border-primary-foreground/20 mt-2">
+                  <div className="pt-2 border-t border-border mt-2">
                     <UserProfile />
                   </div>
                 </>

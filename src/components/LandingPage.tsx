@@ -71,7 +71,7 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
               <Button 
                 size="lg" 
                 onClick={() => onTabChange('browse')} 
-                className="bg-terracotta hover:bg-terracotta/90 text-white text-base px-8 py-6 sm:py-5 rounded-sm min-h-[48px]"
+                className="text-base px-8"
               >
                 Browse All Items
               </Button>
@@ -79,7 +79,7 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
                 size="lg" 
                 variant="outline" 
                 onClick={() => onTabChange('add')} 
-                className="border-2 border-terracotta text-terracotta hover:bg-terracotta/10 text-base px-8 py-6 sm:py-5 rounded-sm min-h-[48px]"
+                className="border-2 border-primary text-primary hover:bg-primary/10 text-base px-8"
               >
                 Add an Item
               </Button>
@@ -89,7 +89,7 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
               <Button 
                 size="lg" 
                 onClick={() => setModalMode('login')} 
-                className="bg-terracotta hover:bg-terracotta/90 text-white text-base px-8 py-6 sm:py-5 rounded-sm min-h-[48px]"
+                className="text-base px-8"
               >
                 Sign In
               </Button>
@@ -97,7 +97,7 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
                 size="lg" 
                 variant="outline" 
                 onClick={() => setModalMode('signup')} 
-                className="border-2 border-terracotta text-terracotta hover:bg-terracotta/10 text-base px-8 py-6 sm:py-5 rounded-sm min-h-[48px]"
+                className="border-2 border-primary text-primary hover:bg-primary/10 text-base px-8"
               >
                 Join Our Community
               </Button>

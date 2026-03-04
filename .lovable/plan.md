@@ -1,44 +1,52 @@
 
 
-## Align Fonts, Colors, and Button Styles
+## Replace Dynamic Illustration Query with Cached Set
 
-### Problems Found
+### Approach
+Instead of calling `get_public_illustrations()` (with `ORDER BY random()`) on every page load, store a curated set of illustration URLs in a `site_config` table. The landing page reads this single cached row. A steward can click "Refresh Illustrations" to pull a new random set whenever they want.
 
-Looking at the screenshot and code, there are several visual inconsistencies:
+### Changes
 
-1. **Two different headers**: `CatalogHeader` (sand bg, serif title, clean) vs `Header` (gradient bg with orange/peach, bolder, has navigation). The `Header` uses a garish `bg-gradient-to-r from-primary to-accent` that clashes with the landing page's calm sand tone.
+**1. Database migration: Create `site_config` table**
+- Single-row table with a `key` (text, primary key) and `value` (jsonb)
+- Insert one row: key = `landing_illustrations`, value = JSON array of illustration URLs
+- Public SELECT policy (no auth needed for landing page)
+- Steward-only UPDATE policy
+- Seed it with the current `get_public_illustrations()` output
 
-2. **AuthButtons uses orange-500/600** (`text-orange-600 border-orange-600 hover:bg-orange-50`, `bg-orange-500 hover:bg-orange-600`) instead of the design system's terracotta. "Join the Party" copy also doesn't match "Join Our Community" on the landing page.
+```sql
+CREATE TABLE public.site_config (
+  key text PRIMARY KEY,
+  value jsonb NOT NULL,
+  updated_at timestamptz DEFAULT now()
+);
 
-3. **Category chips on landing** use `rounded-full` (pill shape) while buttons in the design system use `rounded-sm`. This is intentional and fine for chips, but worth noting.
+-- Public read, steward write
+ALTER TABLE public.site_config ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read" ON public.site_config FOR SELECT USING (true);
+CREATE POLICY "Stewards can update" ON public.site_config FOR UPDATE USING (is_user_steward(auth.uid()));
 
-4. **Landing page buttons** override with inline classes (`rounded-sm`, explicit colors) instead of relying on button variants.
+-- Seed with current random illustrations
+INSERT INTO public.site_config (key, value)
+SELECT 'landing_illustrations', jsonb_agg(illustration_url)
+FROM (SELECT illustration_url FROM public.supplies WHERE illustration_url IS NOT NULL ORDER BY random() LIMIT 20) sub;
+```
 
-5. **Header.tsx** is used on sub-pages (MySupplies, Steward, etc.) and has a completely different visual language from `CatalogHeader` which is used on the main Index page.
+**2. Modify `src/components/LandingPage.tsx`**
+- Replace `supabase.rpc('get_public_illustrations')` with a simple query: `supabase.from('site_config').select('value').eq('key', 'landing_illustrations').single()`
+- Parse the JSON array of URLs from `value`
+- Remove loading skeleton (this query returns instantly and is cached by React Query)
 
-### Plan
+**3. Add "Refresh Landing Illustrations" button to Steward Dashboard**
+- Add a button in `src/components/steward/StewardDashboard.tsx` (or a small new component)
+- On click: call `get_public_illustrations()` RPC to get a fresh random set, then update `site_config` with the new array
+- This is the monthly manual refresh the user described
 
-**1. Fix `src/components/auth/AuthButtons.tsx`**
-- Replace `orange-500/600` with `terracotta` from the design system
-- Change "Join the Party" to "Join Our Community" for consistency
-- Use button variants instead of inline color overrides
-
-**2. Fix `src/components/Header.tsx`**
-- Replace gradient background (`bg-gradient-to-r from-primary to-accent`) with solid `bg-sand` + `border-b border-border` to match `CatalogHeader`
-- Change text colors from `text-primary-foreground` to `text-deep-brown`
-- Update nav button hover states to use `hover:bg-sand/20` instead of white-on-gradient styles
-- Remove the Gift icon and tagline subtitle to match the cleaner `CatalogHeader` style
-
-**3. Clean up `src/components/LandingPage.tsx` buttons**
-- Remove redundant inline style overrides on the CTA buttons (explicit `bg-terracotta`, `rounded-sm`, `min-h-[48px]`) and rely on the button variants + `size="lg"` which already handle this
-- Keep `border-2 border-terracotta` on the outline variant since the default outline border is thinner
-
-**4. Ensure consistent font usage**
-- Headings (`h1-h6`): serif (already set in `index.css` base layer) -- no changes needed
-- Body text, buttons, labels: sans-serif (already the default) -- just need to remove any stray `font-serif` on non-heading elements
-- Supply card item names use `font-serif` which is appropriate (they're titles)
-- The `Header.tsx` title should use `font-serif` to match `CatalogHeader`
+**4. No changes to edge functions or the existing RPC**
+- Keep `get_public_illustrations()` around -- it's still useful as the randomization source when the steward clicks refresh
 
 ### Result
-All pages share the same sand-toned header bar, terracotta accent color, consistent button shapes from the variant system, and clear serif-for-headings / sans-for-everything-else typography.
+- Landing page: one tiny read from `site_config` (cached), no random table scan
+- Steward refreshes illustrations whenever they want via dashboard button
+- Disk IO budget impact: near zero
 
