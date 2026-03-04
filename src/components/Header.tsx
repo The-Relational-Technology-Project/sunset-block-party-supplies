@@ -110,16 +110,12 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
   };
 
   return (
-    <header className="bg-gradient-to-r from-primary to-accent shadow-lg">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-sand">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2 cursor-pointer" onClick={() => handleTabChange('home')}>
-            <Gift className="h-8 w-8 text-primary-foreground" />
-            <div>
-              <h1 className="text-xl md:text-2xl font-bold text-primary-foreground">Community Supplies</h1>
-              <p className="text-primary-foreground/80 text-xs md:text-sm">Share what you have, borrow what you need</p>
-            </div>
-          </div>
+          <button className="cursor-pointer" onClick={() => handleTabChange('home')}>
+            <h1 className="text-lg md:text-xl font-serif font-bold text-deep-brown hover:text-primary transition-colors">Community Supplies</h1>
+          </button>
           
           {/* Desktop Navigation & Auth */}
           <div className="hidden md:flex items-center space-x-4">

@@ -12,15 +12,14 @@ export function AuthButtons({ onSuccess }: { onSuccess?: () => void }) {
         <Button 
           variant="outline" 
           onClick={() => setModalMode('login')}
-          className="text-orange-600 border-orange-600 hover:bg-orange-50"
+          className="border-primary text-primary hover:bg-primary/10"
         >
           Sign In
         </Button>
         <Button 
           onClick={() => setModalMode('signup')}
-          className="bg-orange-500 hover:bg-orange-600"
         >
-          Join the Party
+          Join Our Community
         </Button>
       </div>
       
