@@ -1,6 +1,6 @@
 # Community Supplies
 
-A neighborhood sharing library where neighbors can lend and borrow supplies, tools, party gear, and more. Built for the Outer Sunset neighborhood in San Francisco — and designed to be remixed for any community.
+A neighborhood sharing library where neighbors can lend and borrow supplies, tools, party gear, and more. Built for the Outer Sunset and Outer Richmond neighborhoods in San Francisco — and designed to be remixed for any community.
 
 ## Features
 
