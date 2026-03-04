@@ -126,11 +126,6 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
                     key={key} 
                     variant={activeTab === key ? 'secondary' : 'ghost'} 
                     onClick={() => handleTabChange(key)} 
-                    className={`transition-colors ${
-                      activeTab === key 
-                        ? 'bg-background text-foreground hover:bg-background/90' 
-                        : 'text-primary-foreground hover:bg-primary-foreground/10'
-                    }`}
                   >
                     <Icon className="h-4 w-4 mr-2" />
                     {label}
@@ -140,7 +135,6 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
                   <Button 
                     variant="ghost"
                     onClick={() => handleTabChange('steward')} 
-                    className="text-primary-foreground hover:bg-primary-foreground/10"
                   >
                     <Shield className="h-4 w-4 mr-2" />
                     Steward
@@ -156,7 +150,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="md:hidden text-primary-foreground hover:bg-primary-foreground/10" 
+            className="md:hidden" 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -165,7 +159,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
 
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
-          <nav className="md:hidden mt-4 pb-4 border-t border-primary-foreground/20 pt-4">
+          <nav className="md:hidden mt-4 pb-4 border-t border-border pt-4">
             <div className="flex flex-col space-y-2">
               {user ? (
                 <>
@@ -174,11 +168,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
                       key={key} 
                       variant={activeTab === key ? 'secondary' : 'ghost'} 
                       onClick={() => handleTabChange(key)} 
-                      className={`w-full justify-start transition-colors ${
-                        activeTab === key 
-                          ? 'bg-background text-foreground hover:bg-background/90' 
-                          : 'text-primary-foreground hover:bg-primary-foreground/10'
-                      }`}
+                      className="w-full justify-start"
                     >
                       <Icon className="h-4 w-4 mr-2" />
                       {label}
@@ -188,13 +178,13 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
                     <Button 
                       variant="ghost"
                       onClick={() => handleTabChange('steward')} 
-                      className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+                      className="w-full justify-start"
                     >
                       <Shield className="h-4 w-4 mr-2" />
                       Steward Dashboard
                     </Button>
                   )}
-                  <div className="pt-2 border-t border-primary-foreground/20 mt-2">
+                  <div className="pt-2 border-t border-border mt-2">
                     <UserProfile />
                   </div>
                 </>
