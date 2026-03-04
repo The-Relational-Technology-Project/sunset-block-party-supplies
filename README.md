@@ -1,73 +1,61 @@
-# Welcome to your Lovable project
+# Community Supplies
 
-## Project info
+A neighborhood sharing library where neighbors can lend and borrow supplies, tools, party gear, and more. Built for the Outer Sunset neighborhood in San Francisco — and designed to be remixed for any community.
 
-**URL**: https://lovable.dev/projects/0291df29-1e76-444b-ad61-bff0bd8b305d
+## Features
 
-## How can I edit this code?
+- **Supply catalog** — Browse and search items available to borrow, organized by category
+- **Lending management** — List your own items, track what's lent out, set house rules
+- **Book library** — A community book-sharing shelf
+- **Community onboarding** — Vouched membership with join requests and steward review
+- **Steward dashboard** — Admin tools for managing members, supplies, and requests
+- **AI-powered illustrations** — Auto-generated hand-drawn style illustrations for listed items
+- **Contact & messaging** — Reach out to lenders directly through the app
 
-There are several ways of editing your application.
+## Tech stack
 
-**Use Lovable**
+- [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) + [Vite](https://vitejs.dev/)
+- [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/)
+- [Supabase](https://supabase.com/) (auth, database, edge functions, storage)
+- [Tanstack Query](https://tanstack.com/query) for data fetching
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/0291df29-1e76-444b-ad61-bff0bd8b305d) and start prompting.
+## Fork this for your neighborhood
 
-Changes made via Lovable will be committed automatically to this repo.
+The easiest way to create your own version of this site for your community:
 
-**Use your preferred IDE**
+1. **Go to [studio.relationaltechproject.org](https://studio.relationaltechproject.org/)**
+2. **Remix the project** — Click the project name → Settings → "Remix this project" to create your own copy
+3. **Customize** — Update the branding, neighborhood name, categories, and colors to match your community
+4. **Connect Supabase** — Set up your own Supabase project for auth and data storage
+5. **Publish** — Deploy your community supplies site and share it with your neighbors
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### Running locally
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# Navigate to the project directory
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Environment variables
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+You'll need to set up the following environment variables (see `.env` for the template):
 
-**Use GitHub Codespaces**
+- `VITE_SUPABASE_URL` — Your Supabase project URL
+- `VITE_SUPABASE_ANON_KEY` — Your Supabase anonymous/public key
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## License
 
-## What technologies are used for this project?
+This project is licensed under the [MIT License](LICENSE).
 
-This project is built with:
+## About
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/0291df29-1e76-444b-ad61-bff0bd8b305d) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Built by the [Relational Tech Project](https://relationaltechproject.org/) — exploring how technology can strengthen neighborhood connections.
