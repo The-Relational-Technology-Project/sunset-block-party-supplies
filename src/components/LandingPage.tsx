@@ -34,9 +34,13 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
   useEffect(() => {
     const fetchIllustrations = async () => {
       try {
-        const { data, error } = await supabase.rpc('get_public_illustrations');
-        if (!error && data) {
-          setIllustrations(data.map((row: { illustration_url: string }) => row.illustration_url));
+        const { data, error } = await supabase
+          .from('site_config')
+          .select('value')
+          .eq('key', 'landing_illustrations')
+          .single();
+        if (!error && data?.value) {
+          setIllustrations(data.value as string[]);
         }
       } catch (e) {
         console.error('Failed to fetch illustrations:', e);

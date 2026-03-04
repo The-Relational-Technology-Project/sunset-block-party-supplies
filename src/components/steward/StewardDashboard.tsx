@@ -5,6 +5,7 @@ import { CommunityOverview } from "./CommunityOverview";
 import { SupplyRequestsManager } from "./SupplyRequestsManager";
 import { AllSuppliesManager } from "./AllSuppliesManager";
 import { BulkEmailSender } from "./BulkEmailSender";
+import { RefreshIllustrations } from "./RefreshIllustrations";
 
 export function StewardDashboard() {
   return (
@@ -14,6 +15,9 @@ export function StewardDashboard() {
         <div>
           <h1 className="text-3xl font-bold">Steward Dashboard</h1>
           <p className="text-muted-foreground">Community overview and activity</p>
+        </div>
+        <div className="ml-auto">
+          <RefreshIllustrations />
         </div>
       </div>
 
