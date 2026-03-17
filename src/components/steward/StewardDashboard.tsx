@@ -1,11 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Users, Package, MessageSquare, Mail } from "lucide-react";
+import { Shield, Users, Package, MessageSquare, Mail, Globe } from "lucide-react";
 import { CommunityOverview } from "./CommunityOverview";
 import { SupplyRequestsManager } from "./SupplyRequestsManager";
 import { AllSuppliesManager } from "./AllSuppliesManager";
 import { BulkEmailSender } from "./BulkEmailSender";
 import { RefreshIllustrations } from "./RefreshIllustrations";
+import { CommunityRequestsManager } from "./CommunityRequestsManager";
 
 export function StewardDashboard() {
   return (
@@ -22,7 +23,7 @@ export function StewardDashboard() {
       </div>
 
       <Tabs defaultValue="members" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="members" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Members
@@ -34,6 +35,10 @@ export function StewardDashboard() {
           <TabsTrigger value="requests" className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4" />
             Requests
+          </TabsTrigger>
+          <TabsTrigger value="communities" className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            Communities
           </TabsTrigger>
           <TabsTrigger value="email" className="flex items-center gap-2">
             <Mail className="h-4 w-4" />
@@ -79,6 +84,20 @@ export function StewardDashboard() {
             </CardHeader>
             <CardContent>
               <SupplyRequestsManager />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="communities">
+          <Card>
+            <CardHeader>
+              <CardTitle>Community Requests</CardTitle>
+              <CardDescription>
+                People who want to start a sharing community in their neighborhood
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CommunityRequestsManager />
             </CardContent>
           </Card>
         </TabsContent>

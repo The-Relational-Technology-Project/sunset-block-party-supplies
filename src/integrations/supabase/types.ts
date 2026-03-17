@@ -64,6 +64,45 @@ export type Database = {
           },
         ]
       }
+      community_steward_requests: {
+        Row: {
+          co_stewards: Json | null
+          created_at: string
+          email: string
+          id: string
+          name: string
+          questions: string | null
+          reason: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        Insert: {
+          co_stewards?: Json | null
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          questions?: string | null
+          reason: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Update: {
+          co_stewards?: Json | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          questions?: string | null
+          reason?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       join_requests: {
         Row: {
           connection_context: string | null
