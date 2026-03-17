@@ -88,6 +88,20 @@ export function StewardDashboard() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="communities">
+          <Card>
+            <CardHeader>
+              <CardTitle>Community Requests</CardTitle>
+              <CardDescription>
+                People who want to start a sharing community in their neighborhood
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CommunityRequestsManager />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="email">
           <Card>
             <CardHeader>

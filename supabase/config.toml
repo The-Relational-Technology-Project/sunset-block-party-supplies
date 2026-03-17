@@ -29,3 +29,6 @@ verify_jwt = true
 
 [functions.send-bulk-update]
 verify_jwt = true
+
+[functions.send-community-request-notification]
+verify_jwt = false

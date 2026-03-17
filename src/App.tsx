@@ -25,6 +25,7 @@ const App = () => (
           <Route path="/my-books" element={<MyBooks />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/steward" element={<Steward />} />
+          <Route path="/start-community" element={<StartCommunity />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthModal } from "./auth/AuthModal";
 import { Footer } from "./Footer";
-import { categories } from "@/data/categories";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Users, Share2, HandHeart, ArrowRight, MapPin } from "lucide-react";
 
 interface LandingPageProps {
   onTabChange: (tab: string) => void;
@@ -21,13 +22,10 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
     };
-
     checkUser();
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user || null);
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
@@ -48,81 +46,137 @@ export function LandingPage({ onTabChange }: LandingPageProps) {
         setLoadingIllustrations(false);
       }
     };
-
     fetchIllustrations();
   }, []);
 
   return (
     <div className="min-h-screen bg-sand flex flex-col">
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-8 sm:py-16 text-center relative z-10">
+      <section className="container mx-auto px-4 py-12 sm:py-20 text-center relative z-10">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-deep-brown mb-4 sm:mb-6 leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-deep-brown mb-4 leading-tight">
             Community Supplies
           </h1>
-          
-          <p className="text-lg sm:text-xl text-dusk-pink mb-8 sm:mb-12">
+
+          <p className="text-lg sm:text-xl text-dusk-pink mb-3">
             Borrow what you need. Share what you have.
           </p>
 
-          {/* CTAs */}
-          {user ? (
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-10 sm:mb-16">
-              <Button 
-                size="lg" 
-                onClick={() => onTabChange('browse')} 
-                className="text-base px-8"
-              >
-                Browse All Items
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                onClick={() => onTabChange('add')} 
-                className="border-2 border-primary text-primary hover:bg-primary/10 text-base px-8"
-              >
-                Add an Item
-              </Button>
-            </div>
-          ) : (
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-10 sm:mb-16">
-              <Button 
-                size="lg" 
-                onClick={() => setModalMode('login')} 
-                className="text-base px-8"
-              >
-                Sign In
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                onClick={() => setModalMode('signup')} 
-                className="border-2 border-primary text-primary hover:bg-primary/10 text-base px-8"
-              >
-                Join Our Community
-              </Button>
-            </div>
-          )}
+          <p className="text-base text-muted-foreground mb-10 sm:mb-14 max-w-xl mx-auto">
+            A free, open-source tool for neighborhoods to share supplies, tools, party gear, and more.
+          </p>
 
-          {/* Category Chips */}
-          <div className="mb-8 sm:mb-12">
-            <h2 className="text-xl sm:text-2xl font-serif font-semibold text-deep-brown mb-4 sm:mb-6">
-              What We're Sharing
-            </h2>
-            <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
-              {categories.map((category) => {
-                const Icon = category.icon;
-                return (
-                  <div
-                    key={category.id}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-card border border-border rounded-full text-xs sm:text-sm font-medium text-deep-brown"
-                  >
-                    <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-terracotta" />
-                    {category.name}
-                  </div>
-                );
-              })}
+          {/* Dual CTAs */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-6">
+            {user ? (
+              <Button
+                size="lg"
+                onClick={() => onTabChange('browse')}
+                className="text-base px-8"
+              >
+                Browse Sunset & Richmond
+              </Button>
+            ) : (
+              <Button
+                size="lg"
+                onClick={() => setModalMode('login')}
+                className="text-base px-8"
+              >
+                Browse Sunset & Richmond
+              </Button>
+            )}
+            <Button
+              size="lg"
+              variant="outline"
+              asChild
+              className="border-2 border-primary text-primary hover:bg-primary/10 text-base px-8"
+            >
+              <Link to="/start-community">Start a Sharing Community</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="container mx-auto px-4 pb-12 sm:pb-16">
+        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-deep-brown mb-8 text-center">
+          How It Works
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
+          {[
+            {
+              icon: Users,
+              title: "Start a community",
+              description: "A steward sets up a sharing community for their neighborhood.",
+            },
+            {
+              icon: Share2,
+              title: "Invite your neighbors",
+              description: "Members join and list the items they're happy to lend.",
+            },
+            {
+              icon: HandHeart,
+              title: "Share and borrow",
+              description: "Browse what's available, reach out, and borrow what you need.",
+            },
+          ].map((step, i) => (
+            <div
+              key={i}
+              className="bg-card border border-border rounded-sm p-6 text-center"
+            >
+              <step.icon className="h-8 w-8 text-terracotta mx-auto mb-3" />
+              <h3 className="font-serif font-semibold text-deep-brown mb-2">{step.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
             </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Community Directory */}
+      <section className="container mx-auto px-4 pb-12 sm:pb-16">
+        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-deep-brown mb-6 text-center">
+          Active Communities
+        </h2>
+        <div className="max-w-2xl mx-auto space-y-4">
+          {/* Flagship community */}
+          <div className="bg-card border border-border rounded-sm p-5 sm:p-6 flex items-start gap-4">
+            <div className="bg-sand rounded-full p-2.5 shrink-0">
+              <MapPin className="h-5 w-5 text-terracotta" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-serif font-semibold text-deep-brown text-lg">
+                Sunset & Richmond, SF
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                The founding community — neighbors in San Francisco's Outer Sunset and Outer Richmond sharing supplies, tools, and party gear.
+              </p>
+            </div>
+            <div className="shrink-0">
+              {user ? (
+                <Button size="sm" variant="ghost" onClick={() => onTabChange('browse')}>
+                  Browse <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button size="sm" variant="ghost" onClick={() => setModalMode('login')}>
+                  Sign in <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Start your own CTA */}
+          <div className="bg-card border-2 border-dashed border-terracotta/30 rounded-sm p-5 sm:p-6 text-center">
+            <p className="text-deep-brown font-medium mb-2">
+              Want to start a sharing community in your neighborhood?
+            </p>
+            <p className="text-sm text-muted-foreground mb-4">
+              It's free and open source. We'll help you get set up.
+            </p>
+            <Button variant="outline" asChild className="border-primary text-primary hover:bg-primary/10">
+              <Link to="/start-community">
+                Get Started <ArrowRight className="h-4 w-4 ml-1" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
