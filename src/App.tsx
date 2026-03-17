@@ -8,6 +8,7 @@ import MySupplies from "./pages/MySupplies";
 import MyBooks from "./pages/MyBooks";
 import Profile from "./pages/Profile";
 import Steward from "./pages/Steward";
+import StartCommunity from "./pages/StartCommunity";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
